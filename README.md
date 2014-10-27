@@ -15,7 +15,7 @@ El array "tipos" contiene los tipos de archivos de audio soportados (actualmente
 
 Instalar con los siguientes comandos:
 ```
-git clone https://github.com/don-chalo/pongale-play.git
+git clone https://github.com/don-chalo/pongale-play
 cd PongalePlay/
 npm install
 ```
