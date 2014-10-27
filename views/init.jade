@@ -1,0 +1,140 @@
+doctype html
+html(ng-app="PongalePlay",ng-controller="AudioController as ctrl")
+    head
+        title {{ctrl.info.title ? ctrl.estado() + ctrl.info.artist[0] + '  - ' + ctrl.info.title : 'PongalePlay'}}
+
+        // Viewport mobile tag for sensible mobile support
+        meta(name="viewport",content="width=device-width, initial-scale=1, maximum-scale=1")
+
+        link(href='/stylesheets/foundation-5.4.0/foundation.min.css',rel='stylesheet',type="text/css")
+        link(href='/stylesheets/foundation-icons/foundation-icons.css',rel='stylesheet',type="text/css")
+        link(href='/stylesheets/angular-csp.css',rel='stylesheet',type="text/css")
+        link(href='/stylesheets/audioapp.css',rel='stylesheet',type="text/css")
+
+        script(type="text/javascript", src="/js/libs/jquery-1.9.1.min.js")
+        script(type="text/javascript", src="/js/libs/underscore-min.js")
+        script(type="text/javascript", src="/js/libs/foundation-5.4.0/foundation.min.js")
+        script(type="text/javascript", src="/js/libs/angular/angular.min.js")
+        script(type="text/javascript", src="/js/libs/angular/angular-animate.min.js")
+        script(type="text/javascript", src="/js/libs/angular/angular-resource.min.js")
+        script(type="text/javascript", src="/js/app/main.js")
+        script(type="text/javascript", src="/js/app/entidades.js")
+        script(type="text/javascript", src="/js/app/servicios.js")
+        script(type="text/javascript", src="/js/app/directivas.js")
+        script(type="text/javascript", src="/js/app/libs.js")
+        script#metadata(type="text/html")
+            div.panel.metadata(ng-show="mostrarMetadata")
+                div.title
+                    i.fi-x.icon-16(ng-hide="hideMetadata()")
+                div.cover
+                div.campos
+                    div
+                        span.campo t&iacute;tulo
+                        span.valor {{metadata.title}}
+                    div
+                        span.campo artista
+                        span.valor {{metadata.artist[0]}}
+                    div
+                        span.campo &aacute;lbum
+                        span.valor {{metadata.album}}
+                    div(ng-show="metadata.year")
+                        span.campo año
+                        span.valor {{metadata.year}}
+                    div(ng-show="metadata.genre")
+                        span.campo g&eacute;nero
+                        span.valor(ng-repeat="g in metadata.genre") {{g}}
+        script#info(type="html/text")
+            div.track-info.alert-box(ng-show="info.title")
+                span(ng-show="info.title") [&nbsp;{{info.title}}&nbsp;] &nbsp;
+                span(ng-show="info.artist",ng-repeat="artist in info.artist") [&nbsp;{{artist}}&nbsp;] &nbsp;
+                span(ng-show="info.album") [&nbsp;{{info.album}}&nbsp;] &nbsp;
+                span(ng-show="info.year") [&nbsp;{{info.year}}&nbsp;] &nbsp;
+                span(ng-show="currentTime") [&nbsp;{{currentTime.horas | number:0}}:{{currentTime.minutos | number:0}}:{{currentTime.segundos | number:0}}&nbsp;] &nbsp;
+                span(ng-show="duration") [&nbsp;{{duration.horas | number:0}}:{{duration.minutos | number:0}}:{{duration.segundos | number:0}}&nbsp;] &nbsp;
+                span(ng-show="info.genre") [&nbsp;
+                    span(ng-repeat="genero in info.genre") {{genero}} &nbsp;
+                    |]
+                div.barra-de-busqueda
+                    input(min="0",max="{{rangeDuration}}",defaultValue="0",type="range",ng-model="rangeCurrentTime", ng-change="buscando()")
+    body(ng-keydown="ctrl.onKeyDown($event)")
+        div.row.opciones
+            div.small-12.medium-2.columns
+                h1 Pongale Play
+            div.small-4.medium-4.columns
+                div
+                    button.button.small(ng-click="ctrl.previousTrack()")
+                        i.fi-previous.icon-16
+                    button.button.small(ng-click="ctrl.togglePlayPause()")
+                        i.fi-play.icon-16(ng-hide="ctrl.playing")
+                        i.fi-pause.icon-16(ng-show="ctrl.playing")
+                    button.button.small(ng-click="ctrl.stop()")
+                        i.fi-stop.icon-16
+                    button.button.small(ng-click="ctrl.nextTrack()")
+                        i.fi-next.icon-16
+            div.small-7.medium-5.columns
+                div
+                    div.volume-label
+                        div volume {{ctrl.labelVolume}}
+                        input(min="0",max="10",defaultValue="{{ctrl.volume}}",type="range",ng-model="ctrl.volume", ng-change="ctrl.cambiarVolume()")
+                    div.mute-label(title="silencio",ng-click="ctrl.mute()")
+                        i.fi-volume-strike.icon-16(ng-show="!ctrl.muted")
+                        i.fi-volume.icon-16(ng-show="ctrl.muted")
+            div.small-1.medium-1.columns
+                div.info-label
+                    i.fi-info.icon-20(ng-click="ctrl.showInfoPopUp()")
+        div.container
+            track-info(track="ctrl.info")
+            div.alert-box(ng-show="ctrl.msg", class="{{ctrl.msg.type}}")
+                i.close.fi-x(ng-click="ctrl.hideMsg()")
+                span {{ctrl.msg.txt}}
+            div.listas.row.fila
+                div#column-bandas.small-12.medium-3.columns
+                    div.panel
+                        input#buscador.form-control(type="text",ng-model="query",ng-trim="true",placeholder="buscar...")
+                        div.lista.lista-bandas
+                            div.selectable(ng-repeat="banda in ctrl.bandas | filter: query",ng-click="ctrl.seleccionarBanda(banda._id)", ng-class="{selected:banda.selected}")
+                                span.item {{banda.nombre}}
+                div#column-discos.small-12.medium-4.columns
+                    div.panel
+                        h5 {{ctrl.banda.nombre}}
+                            span.item-detalle(ng-show="ctrl.banda.discos.length") &nbsp; {{ctrl.banda.discos.length}} discos
+                        div.lista.lista-discos
+                            div.lista-vacia(ng-show="!ctrl.banda.discos") Selecciona una banda
+                            div.clearfix.selectable(ng-repeat="album in ctrl.banda.discos", ng-class="{selected:album.selected}")
+                                div.small-10.columns(ng-click="ctrl.seleccionarAlbum($index)")
+                                    span.item-detalle(ng-show="album.ano") {{album.ano}}&nbsp;-&nbsp;
+                                    span(class="{{album.nombre ? 'item' : 'item-detalle'}}") {{album.nombre ? album.nombre : '[sin nombre]'}}
+                                i.right.fi-plus.icon-16(title="agregar a lista de reproducción",ng-click="ctrl.agregarDiscoALista($index)")
+                    div.panel
+                        h5 {{ctrl.disco.nombre}}
+                            span.item-detalle(ng-show="ctrl.disco.ano") &nbsp;[{{ctrl.disco.ano}}]
+                        div.lista.lista-temas
+                            div.lista-vacia(ng-show="!ctrl.disco.temas") Selecciona un disco
+                            div.clearfix.selectable(ng-repeat="tema in ctrl.disco.temas", ng-class="{selected:tema.selected}")
+                                div.small-10.columns(ng-click="ctrl.seleccionarTema($index)")
+                                    span.item-detalle(ng-show="tema.numero") {{tema.numero}}&nbsp;-&nbsp;
+                                    span(class="{{tema.nombre ? 'item' : 'item-detalle'}}") {{tema.nombre ? tema.nombre : '[sin nombre]'}} &nbsp;
+                                    span.item-detalle(ng-show="tema.discoNombre") [{{tema.discoNombre}}]
+                                i.right.fi-plus.icon-16(title="agregar a lista de reproducción",ng-click="ctrl.agregarTemaALista($index)")
+                div#column-lista.small-12.medium-5.columns
+                    div.panel
+                        div.lista.lista-reproduccion
+                            div.lista-vacia(ng-show="ctrl.listaReproduccion.length==0") No existen temas en la lista de reproducci&oacute;n
+                            div.clearfix.selectable(ng-repeat="track in ctrl.listaReproduccion",ng-class="{playing:track.playing, selected:track.selected}", ng-dblclick="ctrl.play($index)", ng-click="ctrl.select($index, $event)", ng-right-click="ctrl.rightClickLista($index, $event)")
+                                span.item-detalle {{$index + 1}}&nbsp;-&nbsp;
+                                span(class="{{track.nombre ? 'item' : 'item-detalle' }}") {{track.nombre ? track.nombre : '[sin nombre]'}}&nbsp;-&nbsp;
+                                span.item-detalle {{track.bandaNombre ? track.bandaNombre : '[sin nombre]'}}
+                        div.clearfix.limpiar-todo(ng-show="ctrl.listaReproduccion.length", ng-click="ctrl.limpiarLista()")
+                            span
+                                i.right.fi-trash
+                                span.right limpiar lista
+        metadata-tema.metadata-show(show="ctrl.mostrarMetadata", value="ctrl.metadata")
+        div(ng-show="ctrl.menuRightClick.show", style="top:{{ctrl.menuRightClick.top}}px; left: {{ctrl.menuRightClick.left}}px").right-click
+            div
+                div(ng-click="ctrl.playRightClick()") reproducir
+                div(ng-click="ctrl.mostrarInfo()") ver informaci&oacute;n
+                div(ng-click="ctrl.eliminarTema()") eliminar
+        div.reveal-modal.medium.info-popup-show(ng-show="ctrl.infoPopUp.show")
+             div(ng-include="'help'")
+             a.close-reveal-modal(ng-click="ctrl.hideInfoPopUp()") &#215;
+            

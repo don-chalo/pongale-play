@@ -1,0 +1,5 @@
+/data/
+/functional-test/reports/
+/lib/
+/node_modules/
+/nightwatch_bkp.json.txt

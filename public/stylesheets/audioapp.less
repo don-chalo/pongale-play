@@ -1,0 +1,472 @@
+/* (+) Animaciones */
+/* 3Р*/
+.animate-show{
+}
+/* transition: property duration timing-function delay|initial|inherit; */
+/* Se ejecuta cuando se oculta el elemento y solo mientras dura la transición */
+/* 1Р*/
+.animate-show.ng-hide-add{
+    /*display: none!important;*/
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 20;
+}
+/* 2Р*/
+.animate-show.ng-hide-add-active{
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+    z-index: 10;
+}
+/* Se ejecuta cuando se muestra el elemento y solo mientras dura la transición. */
+/* 1Р*/
+.animate-show.ng-hide-remove{
+    -webkit-transform: rotateY(-180deg);
+    -moz-transform: rotateY(-180deg);
+    -ms-transform: rotateY(-180deg);
+    -o-transform: rotateY(-180deg);
+    transform: rotateY(-180deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 10;
+}
+/* 2Р*/
+.animate-show.ng-hide-remove-active {
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    -ms-transform: rotateX(0deg);
+    -o-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+    z-index: 20;
+}
+.animate-show.ng-hide{
+    /*opacity: 0;*/
+}
+.animate-show.ng-show{
+    background-color: yellow;
+    /*opacity: 1;*/
+}
+
+
+/* (+) animaciones metadata */
+.metadata-show.ng-hide-remove, .metadata-show.ng-hide-add{
+    -webkit-transition-duration: 0.25s;
+    -moz-transition-duration: 0.25s;
+    -o-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+.metadata-show.ng-hide{
+    opacity: 0;
+}
+/* (-) animaciones metadata */
+
+/* (+) animaciones popup info */
+.info-popup-show.ng-hide-remove{
+    -webkit-transform: rotateY(-180deg);
+    -moz-transform: rotateY(-180deg);
+    -ms-transform: rotateY(-180deg);
+    -o-transform: rotateY(-180deg);
+    transform: rotateY(-180deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 10;
+}
+.info-popup-show.ng-hide-remove-active {
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    -ms-transform: rotateX(0deg);
+    -o-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+    z-index: 20;
+}
+.info-popup-show.ng-hide-add{
+    -webkit-transition-duration: 0.25s;
+    -moz-transition-duration: 0.25s;
+    -o-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+.info-popup-show.ng-hide{
+    opacity: 0;
+}
+.info-popup-show{
+    display: block;
+    visibility: visible;
+}
+.info-popup-show.reveal-modal p{
+    font-size: 12px;
+}
+/* (-) animaciones popup info */
+
+/* (-) Animaciones */
+
+/* (+) menu */
+.opciones{
+    background-color: #333;
+    max-width: 100%;
+    width: 100%;
+    
+    h1{
+        color: #fff;
+        font-size: 17px;
+        font-weight: normal;
+        display: inline-block;
+        margin-right: 10px;
+        margin-top: 10px;
+    }
+    button.button{
+        margin-bottom: 2px;
+        margin-top: 2px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+}
+/* (-) menu */
+.listas{
+    margin-top: 5px;
+    height: 100%;
+}
+.track-info.alert-box{
+    border-width: 0px;
+    /*font-size: 16px*/
+    margin-top: 0px;
+    padding: 0px;
+}
+.selectable{
+    font-size: 0.7em;
+    border-bottom: 1px #ccc solid;
+    font-family: "Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+    font-weight: bold;
+}
+.playing, .playing .item-detalle{
+    background-color: #008cba;
+    border-color: #007095;
+    color: #fff;
+}
+
+.selected{
+    background-color: #d8d8d8;
+}
+.selected.playing{
+    background-color: #008cba;
+    border-color: #007095;
+    color: #fff;
+}
+.item-detalle{
+    font-style: italic;
+    color: #777;
+}
+.item{
+    font-weight: bold;
+}
+.lista{
+    overflow: auto;
+}
+.fila{
+    margin-left: 5px;
+    margin-right: 5px;
+    max-width: 99%;
+}
+.lista-bandas,.lista-reproduccion{
+    height: 400px;
+}
+.lista-discos, .lista-temas{
+    height: 170px;
+}
+.lista-items{
+    background-color: #f2f2f2;
+    border-width: 0px;
+    height: 90%;
+}
+.icon-12{
+    font-size: 12px;
+}
+.icon-16{
+    font-size: 16px;
+}
+.icon-20{
+    font-size: 20px;
+}
+.lista-vacia{
+    color: #d8d8d8;
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+}
+.limpiar-todo{
+    cursor: pointer;
+    
+    span, i{
+        color: #bbb;
+        font-weight: bold;
+    }
+    i{
+        font-size: 20px;
+        margin-left: 4px;
+    }
+}
+.volume-label{
+    display: inline;
+    input[type="range"]{
+        display:none;
+    }
+    div{
+        color: yellow;
+        display: inline-block;
+        margin-right: 5px;
+        width: 90px;
+    }
+}
+.volume-label:hover input[type="range"], input[type="range"]:hover{
+    display: inline;
+}
+.volume{
+    color: yellow;
+    margin-right: 2px;
+ }
+.volume:hover, .volumeselected{
+    color: red;
+}
+.mute-label{
+    color: #fff;;
+    display: inline-block;
+    padding-right: 5px;
+    padding-left: 5px;
+}
+.info-label{
+    color: #fff;
+}
+
+.opciones{
+    .columns{
+        div{
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+    }
+}
+
+.container{
+    min-height: 620px;
+}
+#column-bandas, #column-discos, #column-lista {
+    height: 95%;
+}
+#column-bandas>.panel, #column-lista>.panel{
+    height: 95%;
+}
+#column-discos>.panel{
+    height: 46%;
+}
+div.lista-bandas, div.lista-discos, div.lista-temas, div.lista-reproduccion{
+    height: 90%;
+}
+
+input[type=range] {
+    /*removes default webkit styles*/
+    -webkit-appearance: none;
+    
+    /*fix for FF unable to apply focus style bug */
+    /*border: 1px solid white;*/
+    
+    /*required for proper track sizing in FF*/
+    width: 300px;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    width: 300px;
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+    margin-top: -4px;
+}
+input[type=range]:focus {
+    outline: none;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+input[type=range]::-moz-range-track {
+    width: 300px;
+    height: 5px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+}
+input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+}
+
+/*hide the outline behind the border*/
+input[type=range]:-moz-focusring{
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+input[type=range]::-ms-track {
+    width: 300px;
+    height: 16px;
+    background: #ddd;
+    border: none;
+    border-radius: 10px;
+    /*remove default tick marks*/
+    color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+    outline: none;
+    background: #777;
+    border-radius: 10px 0 0 10px;
+}
+input[type=range]::-ms-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+}
+input[type=range]:focus::-ms-track {
+    background: #ccc;
+}
+input[type=range]:focus::-ms-fill-lower {
+    background: #888;
+}
+i[class*="icon-"]{
+    cursor: pointer;
+}
+.metadata{
+    background-color: #008cba;
+    border-color: #007095;
+    left: 10px;
+    position:fixed;
+    top: 100px;
+    
+    .title{
+        i{
+            float: right;
+        }
+    }
+    .campos, .cover{
+        border-width: 0px;
+        display: inline-block;
+    }
+    
+    .campo, .valor{
+        font-family: "Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+    }
+    .campo{
+        color: #ccc;
+        font-size: 1em;
+        font-style: italic;
+        margin-right: 10px;
+    }
+    .valor{
+        color: #fff;
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+}
+.barra-de-busqueda{
+    text-align: center;
+    width: 100%;
+    
+    input[type="range"]{
+        width: 99%;
+    }
+}
+.right-click{
+    background-color: #333;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    padding-bottom: 10px;
+    position: fixed;
+    
+    div{
+        font-family: "Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+        font-size: 10px;
+        padding-left: 10px;
+        margin: 0px;
+        width: 100%;
+        
+        div{
+            color: #ccc;
+            cursor: pointer;
+            padding-top: 4px;
+            padding-right: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #555;
+            border-left: 1px solid #555;
+            width: 100%;
+        }
+        div:hover{
+            background-color: #555;
+        }
+    }
+}
