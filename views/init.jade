@@ -55,7 +55,7 @@ html(ng-app="PongalePlay",ng-controller="AudioController as ctrl")
                     span(ng-repeat="genero in info.genre") {{genero}} &nbsp;
                     |]
                 div.barra-de-busqueda
-                    input(min="0",max="{{rangeDuration}}",defaultValue="0",type="range",ng-model="rangeCurrentTime", ng-change="buscando()")
+                    input.barra-de-busqueda(min="0",max="{{rangeDuration}}",defaultValue="0",type="range",ng-model="rangeCurrentTime", ng-change="buscando()")
     body(ng-keydown="ctrl.onKeyDown($event)")
         div.row.opciones
             div.small-12.medium-2.columns
