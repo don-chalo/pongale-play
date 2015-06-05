@@ -1,18 +1,8 @@
-var instance = require('../schemas/Banda');
+var nedb = require('nedb');
+var path = require('path');
 
-exports.readAll = function(fc){
-    instance
-    .find( { } )
-    .sort({"nombre": 1})
-    .exec( function(err, result){
-        fc(err, result);
-    });
-};
+var _filepath = path.join(__dirname, '../data/bandas.db');
 
-exports.read = function(query, fc){
-    instance
-    .findOne( { _id: query.id } )
-    .exec( function(err, result){
-        fc(err, result);
-    });
-};
+var BandaModel = new nedb({ filename: _filepath, autoload: true });
+
+module.exports = BandaModel;

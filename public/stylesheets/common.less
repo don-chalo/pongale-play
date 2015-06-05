@@ -1,0 +1,198 @@
+body{
+    padding: 0px;
+    margin: 0px;
+    font-family: "Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 150%;
+    position: relative;
+    cursor: default;
+}
+
+/* (+) Animaciones */
+/* 3Р*/
+.animate-show{
+}
+/* transition: property duration timing-function delay|initial|inherit; */
+/* Se ejecuta cuando se oculta el elemento y solo mientras dura la transición */
+/* 1Р*/
+.animate-show.ng-hide-add{
+    /*display: none!important;*/
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 20;
+}
+/* 2Р*/
+.animate-show.ng-hide-add-active{
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+    z-index: 10;
+}
+/* Se ejecuta cuando se muestra el elemento y solo mientras dura la transición. */
+/* 1Р*/
+.animate-show.ng-hide-remove{
+    -webkit-transform: rotateY(-180deg);
+    -moz-transform: rotateY(-180deg);
+    -ms-transform: rotateY(-180deg);
+    -o-transform: rotateY(-180deg);
+    transform: rotateY(-180deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 10;
+}
+/* 2Р*/
+.animate-show.ng-hide-remove-active {
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    -ms-transform: rotateX(0deg);
+    -o-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+    z-index: 20;
+}
+.animate-show.ng-hide{
+    /*opacity: 0;*/
+}
+.animate-show.ng-show{
+    /*background-color: yellow;*/
+    /*opacity: 1;*/
+}
+
+
+/* (+) animaciones metadata */
+.metadata-show.ng-hide-remove, .metadata-show.ng-hide-add{
+    -webkit-transition-duration: 0.25s;
+    -moz-transition-duration: 0.25s;
+    -o-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+.metadata-show.ng-hide{
+    -webkit-transform: translate(-100%, 0px);
+    -moz-transform: translate(-100%, 0px);
+    -ms-transform: translate(-100%, 0px);
+    -o-transform: translate(-100%, 0px);
+    transform: translate(-100%, 0px);
+    opacity: 0;
+}
+.metadata-show.ng-show{
+    -webkit-transform: translate(0px, 0px);
+    -moz-transform: translate(0px, 0px);
+    -ms-transform: translate(0px, 0px);
+    -o-transform: translate(0px, 0px);
+    transform: translate(0px, 0px);
+}
+/* (-) animaciones metadata */
+
+/* (+) animaciones popup info */
+.info-popup-show.ng-hide-remove{
+    -webkit-transform: rotateY(-180deg);
+    -moz-transform: rotateY(-180deg);
+    -ms-transform: rotateY(-180deg);
+    -o-transform: rotateY(-180deg);
+    transform: rotateY(-180deg);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -ms-backface-visibility: hidden;
+    -o-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    transform-origin: center center;
+    position: absolute;
+    z-index: 10;
+}
+.info-popup-show.ng-hide-remove-active {
+    -webkit-transform: rotateX(0deg);
+    -moz-transform: rotateX(0deg);
+    -ms-transform: rotateX(0deg);
+    -o-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+    z-index: 20;
+}
+.info-popup-show.ng-hide-add{
+    -webkit-transition-duration: 0.25s;
+    -moz-transition-duration: 0.25s;
+    -o-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+.info-popup-show.ng-hide{
+    opacity: 0;
+}
+.info-popup-show{
+    display: block;
+    visibility: visible;
+}
+.info-popup-show.reveal-modal p{
+    font-size: 12px;
+}
+/* (-) animaciones popup info */
+
+/* (-) Animaciones */
+
+
+input[type="text"]{
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    background-color: #fff;
+    color: #000;
+    font-size: 0.875rem;
+    margin: 0 0 1rem 0;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    transition: box-shadow 0.45s,border-color 0.45s ease-in-out;
+}
+
+.clickeable{
+    cursor: pointer;
+}

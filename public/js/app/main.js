@@ -2,244 +2,420 @@
 
 var app = angular.module('PongalePlay', ['Entidades', 'BibliotecaSrv', 'Componentes', 'ngAnimate', 'Librerias']);
 
-app.controller('AudioController', ['audio', 'BandaSrv', 'DiscoSrv', 'TemaSrv', 'getKeyEventCode', function(audio, bandaSrv, discoSrv, temaSrv, getKeyEventCode){
+app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '$document', '$scope', 'audio', 'BandaSrv', 'DiscoSrv', 'TemaSrv', 'getKeyEventCode', 'formatearSegundos', function(listaReproduccion, $timeout, $window, $document, $scope, audio, bandaSrv, discoSrv, temaSrv, getKeyEventCode, FormatearSegundos){
     
     var self = this;
     var indexTrack = -1;
-    var volMin = 0;
-    var volMax = 10;
     
-    self.bandas = [];
-    self.banda = {};
-    self.disco = {};
-    self.listaReproduccion = [];
-    self.info = {};
-    self.infoPopUp = {};
-    self.menuRightClick = {};
-
-    self.playing = audio.playing();
-    self.paused = audio.paused();
-    self.stoped = audio.stoped();
-    self.muted = false;
-
-    self.estado = function(){ 
-        if(self.playing) return '';
-        if(self.paused) return '[pausa]';
-        if(self.stoped) return '[detenido]';
-    };
+    $scope.volMin = audio.getVolumeMin();
+    $scope.volMax = audio.getVolumeMax();
     
-    self.volume = 1;
-    self.labelVolume = 1;
-    self.cambiarVolume = function(){
-        Vol( self.volume );
+    $scope.bandas = [];
+    $scope.banda = {};
+    $scope.disco = {};
+    $scope.listaReproduccion = listaReproduccion;
+    $scope.info = {};
+    $scope.infoPopUp = {};
+    $scope.menu = {};
+
+    $scope.muted = false;
+
+    /* (+) Volume */
+    $scope.$watch('volume', function(newValue, oldValue){
+        var volume = parseInt( newValue ? newValue : 0 );
+        audio.setVolume( volume );
+        $scope.labelVolume = (volume == $scope.volMin ? 'min' : (volume == $scope.volMax ? 'max' : volume));
+    });
+    
+    self.showVolumeRange = function(){
+        $scope.showVolumeRange = true;
     };
-
-    Vol( self.volume );
-
+    self.hideVolumeRange = function(){
+        $scope.showVolumeRange = false;
+    };
+    $scope.setVolume = function($index, $event){
+        $scope.volume = parseInt( $index );
+    };
+    /* (-) Volume */
+    
     self.seleccionarBanda = function(id){
 
-        var banda = _.findWhere( self.bandas, { _id: id } );
+        var banda = _.findWhere( $scope.bandas, { _id: id } );
         
-        self.bandas.forEach(function(item){ item.selected = false; });
+        $scope.bandas.forEach(function(item){ item.selected = false; });
         
         banda.selected = true;
         
-        self.disco = {};
+        $scope.disco = {};
         
-        discoSrv.getAll({ bandaId: banda._id }, function($discos){
-            self.banda = { _id: banda._id, nombre: banda.nombre, discos: _.sortBy($discos, "ano") };
+        var _discos = discoSrv.query({ order : 'ano=1', bandaid: banda._id }, function($discos){
+            $scope.banda = { _id: banda._id, nombre: banda.nombre, discos: _.sortBy(_discos, "ano") };
         });
+        
+        _discos.$promise.catch(_catch);
     };
     
     self.seleccionarAlbum = function(index){
         
-        var disco = self.banda.discos[index];
+        var disco = $scope.banda.discos[index];
 
-        self.banda.discos.forEach(function(item){ item.selected = false; });
+        $scope.banda.discos.forEach(function(item){ item.selected = false; });
         
         disco.selected = true;
         
-        temaSrv.getAll({ bandaId: self.banda._id, discoId: disco._id } , function($temas){
-            self.disco = { _id: disco._id, bandaId: self.banda._id, nombre: disco.nombre, ano: disco.ano ,temas: _.sortBy($temas, "numero"), bandaNombre: self.banda.nombre };
+        var _temas = temaSrv.query({ discoid: disco._id, order: 'numero=1' } , function($temas){
+            $scope.disco = { _id: disco._id, bandaId: $scope.banda._id, nombre: disco.nombre, ano: disco.ano ,temas: _.sortBy(_temas, "numero"), bandaNombre: $scope.banda.nombre };
         });
+        
+        _temas.$promise.catch(_catch);
     };
     
-    self.agregarDiscoALista = function(index){
+    self.agregarDiscoALista = function(){
+        
+        var cb = function() {};
+        
+        if(arguments.length > 0){            
+            if(typeof arguments[0] === 'number'){
+                var disco = $scope.banda.discos[ arguments[0] ];
+            }else if(typeof arguments[0] === 'function'){
+                cb = arguments[0];
+                var disco = _.findWhere( $scope.banda.discos, { selected: true } );
+            }
+        }else{
+            var disco = _.findWhere( $scope.banda.discos, { selected: true } );
+        }
 
-        var disco = self.banda.discos[index];
-
-        temaSrv.getAll({ bandaId: self.banda._id, discoId: disco._id }, function($temas){
+        var _temas = temaSrv.query({ discoid: disco._id, order: 'numero=1' }, function($temas){
             
-            $temas = _.sortBy( $temas, "numero" );
+            _temas = _.sortBy( _temas, "numero" );
             
-            for(var i = 0; i < $temas.length; i++){
-                self.listaReproduccion.push({
+            for(var i = 0; i < _temas.length; i++){
+                $scope.listaReproduccion.addItem({
                     playing: false,
-                    indice: $temas[i].indice,
-                    numero: $temas[i].numero,
-                    nombre: $temas[i].nombre,
+                    temaId: _temas[i]._id,
+                    numero: _temas[i].numero,
+                    nombre: _temas[i].nombre,
                     discoNombre: disco.nombre,
                     discoId: disco._id,
                     discoAno: disco.ano,
-                    bandaNombre: self.banda.nombre,
-                    bandaId: self.banda._id,
-                    url: '/banda/' + self.banda._id + '/disco/' + disco._id + '/tema/' + $temas[i].indice + '/metadata'
+                    bandaNombre: $scope.banda.nombre,
+                    bandaId: $scope.banda._id,
+                    url: '/tema/' + _temas[i]._id + '/metadata'
                 });
             }
+            
+            cb();
         });
-    };
-    self.agregarTemaALista = function(index){
-        var tema = self.disco.temas[index];
 
-        self.listaReproduccion.push({
+        _temas.$promise.catch(_catch);
+        
+        $scope.menu.discos = false;
+    };
+    self.agregarTemaALista = function(){
+        
+        var cb = function(){};
+        
+        if(arguments.length > 0){
+            if(typeof arguments[0] === 'number'){
+                var tema = $scope.disco.temas[ arguments[0] ];
+            }else if(typeof arguments[0] === 'function'){
+                cb = arguments[0];
+                var tema = _.findWhere( $scope.disco.temas, { selected: true } );
+            }
+        }else{
+            var tema = _.findWhere( $scope.disco.temas, { selected: true } );
+        }
+
+        $scope.listaReproduccion.addItem({
             playing: false,
-            indice: tema.indice,
+            temaId: tema._id,
             numero: tema.numero,
             nombre: tema.nombre,
-            discoNombre: self.disco.nombre,
-            discoId: self.disco._id,
-            discoAno: self.disco.ano,
-            bandaNombre: self.disco.bandaNombre,
-            bandaId: self.disco.bandaId,
-            url: '/banda/' + self.disco.bandaId + '/disco/' + self.disco._id + '/tema/' + tema.indice + '/metadata'
+            discoNombre: $scope.disco.nombre,
+            discoId: $scope.disco._id,
+            discoAno: $scope.disco.ano,
+            bandaNombre: $scope.disco.bandaNombre,
+            bandaId: $scope.disco.bandaId,
+            url: '/banda/' + $scope.disco.bandaId + '/disco/' + $scope.disco._id + '/tema/' + tema._id + '/metadata'
         });
-    };
-    self.play = function(index){
-        var tema = self.listaReproduccion[index];
         
-        temaSrv.get({ bandaId: tema.bandaId, discoId: tema.discoId, indice: tema.indice, opcion: 'metadata' }, function($tema){
-            self.info = $tema;
-            var url = '/banda/' + tema.bandaId + '/disco/' + tema.discoId + '/tema/' + tema.indice + '/stream';
-            var tocando = audio.play(url, $tema.contentType);
-            
-            TemaTerminado(indexTrack);
+        cb();
+        
+        $scope.menu.temas = false;
+    };
 
+    self.reproducir = function(){
+        var cb = function(){};
+        
+        if(arguments.length > 0){
+            if(typeof arguments[0] === 'number'){
+                var index = arguments[0];
+                var tema = $scope.listaReproduccion[ index ];
+            }else if(typeof arguments[0] === 'function'){
+                cb = arguments[0];
+                var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
+                var index = $scope.listaReproduccion.indexOf( tema );
+            }
+        }else{
+            var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
+            var index = $scope.listaReproduccion.indexOf( tema );
+        }
+
+        var _tema = temaSrv.get({ temaid: tema.temaId, opcion: 'metadata' }, function($tema){
+            $scope.info = _tema;
+            var url = '/tema/' + tema.temaId + '/stream';
+            var tocando = audio.play(url, _tema.contentType);
+            
             if(tocando){
                 tema.playing = true;
                 indexTrack = index;
             }
-            ActualizaEstado();
         });
+        
+        _tema.$promise.catch(_catch);
+        
+        $scope.menu.lista = false;
     };
-    self.playRightClick = function(){
-        var tema = _.findWhere( self.listaReproduccion, { selected: true } );
-        self.play( self.listaReproduccion.indexOf( tema ) );
-        self.menuRightClick.show = false;
+    self.reproducirTema = function(){
+        $scope.listaReproduccion.removeAll();
+        self.agregarTemaALista( function(){ self.reproducir( 0 ); } );
+        
+        $scope.menu.temas = false;
     };
+    self.reproducirDisco = function(){
+        $scope.listaReproduccion.removeAll();
+        self.agregarDiscoALista( function(){ self.reproducir( 0 ); } );
+        
+        $scope.menu.discos = false;
+    };
+    
     self.seleccionarTema = function(index){
-        self.disco.temas.forEach(function(item){ item.selected = false; });
-        self.disco.temas[index].selected = true;
+        $scope.disco.temas.forEach(function(item){ item.selected = false; });
+        $scope.disco.temas[index].selected = true;
     };
     self.select = function(index, $event){
         if($event.ctrlKey){
-            self.listaReproduccion[index].selected = !self.listaReproduccion[index].selected;
+            $scope.listaReproduccion[index].selected = !$scope.listaReproduccion[index].selected;
         }else if($event.shiftKey){
-            var index_1 = self.listaReproduccion.indexOf( _.findWhere( self.listaReproduccion, { selected: true } ) );
+            var index_1 = $scope.listaReproduccion.indexOf( _.findWhere( $scope.listaReproduccion, { selected: true } ) );
             if(index_1 > index){
                 for(var i = index; i <= index_1; i++){
-                    self.listaReproduccion[i].selected = true;
+                    $scope.listaReproduccion[i].selected = true;
                 }
             }else{
                 for(var i = index_1; i <= index; i++){
-                    self.listaReproduccion[i].selected = true;
+                    $scope.listaReproduccion[i].selected = true;
                 }
             }
         }else{
-            var selected = self.listaReproduccion[index].selected;
-            self.listaReproduccion.forEach(function(item){ item.selected = false; });
-            self.listaReproduccion[index].selected = true;
+            var selected = $scope.listaReproduccion[index].selected;
+            $scope.listaReproduccion.forEach(function(item){ item.selected = false; });
+            $scope.listaReproduccion[index].selected = true;
         }
     };
     self.previousTrack = function(){
-        if(indexTrack > 0 && self.listaReproduccion[indexTrack - 1]){
-            TemaTerminado(indexTrack);
-            self.play(indexTrack - 1);
+        if(indexTrack > 0 && $scope.listaReproduccion[indexTrack - 1]){
+            self.reproducir(indexTrack - 1);
         }
     };
     self.nextTrack = function(){
-        if(self.listaReproduccion.length > (indexTrack + 1) && self.listaReproduccion[indexTrack + 1]){
-            TemaTerminado(indexTrack);
-            self.play(indexTrack + 1);
+        if($scope.listaReproduccion.length > (indexTrack + 1) && $scope.listaReproduccion[indexTrack + 1]){
+            self.reproducir(indexTrack + 1);
         }
-    };
-    self.stop = function(){
-        audio.stop();
-        ActualizaEstado();
     };
     self.togglePlayPause = function(){
         audio.togglePlayPause();
-        ActualizaEstado();
     };
     self.mute = function(){
-        self.muted = audio.toggleMute();
+        $scope.muted = audio.toggleMute();
     };
     self.limpiarLista = function(){
-        self.listaReproduccion = [];
+        $scope.listaReproduccion.removeAll();
     };
-    self.mostrarInfo = function(){
-        var tema = _.findWhere( self.listaReproduccion, { selected: true } );
-        temaSrv.get({ bandaId: tema.bandaId, discoId: tema.discoId, indice: tema.indice, opcion: 'metadata' }, function($tema){
-            self.metadata = $tema;
+    
+    /* (+) Buscador tema (range) */
+    $scope.buscador = function(index, event){
+        audio.setCurrentTime ( parseInt( index ? index : 0 ) );
+    };
+    
+    audio.timeupdate( function(duration, currentTime) {
+        $scope.$apply(function() {
+            if(duration){
+                $scope.duration = FormatearSegundos(duration);
+                $scope.maxTimeRange = parseInt( duration );
+            }else{
+                $scope.maxTimeRange = 0;
+            }
+            
+            if(currentTime){
+                $scope.currentTime = FormatearSegundos(currentTime);
+                $scope.currentTimeRange = parseInt( currentTime );
+            }else{
+                $scope.currentTimeRange = 0;
+            }
+        });
+    });
+    /* (-) Buscador tema (range) */
+
+    audio.error(function(err){
+        _catch(err);
+    });
+    
+    function MostrarInfo(tema){
+        self.mostrarMetadata = false;
+        
+        var _tema = temaSrv.get({ temaid: tema.temaId, opcion: 'metadata' }, function(){
+            self.metadata = _tema;
             self.mostrarMetadata = true;
         });
-        self.menuRightClick.show = false;
+
+        _tema.$promise.catch(_catch);
     };
-    self.hideMetadata = function(){ self.mostrarMetadata = false; };
+    self.mostrarInfoLista = function(){
+        var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
+
+        MostrarInfo( tema );
+        
+        $scope.menu.lista = false;
+    };
+    self.mostrarInfoTema = function(){
+        
+        var tema = _.findWhere( $scope.disco.temas, { selected: true } );
+
+        var track = {
+            temaId: tema._id,
+            discoId: $scope.disco._id,
+            bandaId: $scope.disco.bandaId,
+            opcion: 'metadata'
+        };
+        
+        MostrarInfo( track );
+        
+        $scope.menu.temas = false;
+    };
+    
     self.eliminarTema = function(){
         EliminarTemasSeleccionados();
-        self.menuRightClick.show = false;
+        
+        $scope.menu.lista = false;
     };
-    self.rightClickLista = function(index, $event){
-        /*
+    
+    self.menuListaReproduccion = function(index, $event){
         $event.ctrlKey = false;
         $event.shiftKey = false;
         self.select(index, $event);
-        self.menuRightClick.left = $event.pageX;
-        self.menuRightClick.top = $event.pageY;
-        self.menuRightClick.show = true;
-        */
+        $scope.menu.left = $event.pageX - 5;
+        $scope.menu.top = $event.pageY - 5;
+        $scope.menu.lista = true;
     };
-    self.ocultarInfo = function(){
-        self.mostrarMetadata = false;
+    self.menuListaTemas = function($index, $event) {
+        $scope.menu.left = $event.pageX - 5;
+        $scope.menu.top = $event.pageY - 5;
+        $scope.menu.temas = true;
+        
+        self.seleccionarTema($index);
+    };
+    self.menuListaDiscos = function($index, $event){
+        $scope.menu.left = $event.pageX;
+        $scope.menu.top = $event.pageY;
+        $scope.menu.discos = true;
+        
+        self.seleccionarAlbum($index);
     };
     self.hideMsg = function(){
-        self.msg = undefined;
+        $scope.msg.visible = false;
     };
     self.onKeyDown = function ($event) {
         //46: delete
         if(46 == getKeyEventCode($event)){ EliminarTemasSeleccionados(); }
     };
     self.showInfoPopUp = function(){
-        self.infoPopUp.show = true;
+        $scope.infoPopUp.show = true;
     };
     self.hideInfoPopUp = function(){
-        self.infoPopUp.show = false;
+        $scope.infoPopUp.show = false;
+    };
+    
+    $scope.paneles = {};
+    $scope.paneles['column-bandas'] = true;
+    $scope.paneles['column-discos'] = true;
+    $scope.paneles['column-temas'] = true;
+    $scope.paneles['column-lista'] = true;
+
+    self.showPanel = function($event, element){
+        $scope.paneles[element] = true;
+    };
+    self.hidePanel = function($event, element){
+        $scope.paneles[element] = false;
     };
     
     audio.ended( function() { self.nextTrack(); });
     
-    bandaSrv.getAll({}, function($result){
-        self.bandas = $result;
+    var _bandas = bandaSrv.query({ order : 'nombre=1' }, function($result, header){
+        $scope.bandas = _bandas;
     });
-
-    function Vol(value){
-        audio.setVolume( value );
-        self.labelVolume = (value == volMin ? 'min' : (value == volMax ? 'max' : value));
-    };
-    function TemaTerminado(index){
-        if(index > -1 && self.listaReproduccion[index]){
-            var tema = self.listaReproduccion[index];
-            tema.playing = false;
-        }
-    };
-    function ActualizaEstado(){
-        self.playing = audio.playing();
-        self.paused = audio.paused();
-        self.stoped = audio.stoped();
-    }
+        
+    _bandas.$promise.catch(_catch);
+    
     function EliminarTemasSeleccionados(){
-        self.listaReproduccion = _.reject( self.listaReproduccion, function(tema){ return tema.selected; } );
+        $scope.listaReproduccion.setArray( _.reject( $scope.listaReproduccion, function(tema){ return tema.selected; } ) );
     }
-    jQuery(window).bind('resize', function(){ jQuery('div.container').css('height', (window.innerHeight - 80) + 'px'); });
-    jQuery(window).trigger('resize');
+    
+    $window.addEventListener('resize', function(){
+        $scope.$apply(function(){
+            $scope.containerHeight = $window.window.innerHeight - 80;
+        });
+    });
+    
+    $scope.hideMenu = function(){
+        $scope.menu.lista = false;
+        $scope.menu.temas = false;
+        $scope.menu.discos = false;
+    };
+    
+    function getEstado(){ 
+        if($scope.playing) return '';
+        if($scope.paused) return '[pausa]';
+    };
+    
+    $scope.$watch('info', function(newValue, oldValue){
+        $document.context.title = newValue.title ? getEstado() + newValue.artist[0] + '  - ' + newValue.title : 'PongalePlay';
+    });
+    
+    $scope.$watch(
+        function(){
+            return audio.getState();
+        },
+        function(newValue, oldValue){
+            $scope.playing = audio.playing();
+            $scope.paused = audio.paused();
+            
+            $document.context.title = $scope.info.title ? getEstado() + $scope.info.artist[0] + '  - ' + $scope.info.title : 'PongalePlay';
+        }
+    );
+    
+    $scope.$watch(
+        function(){
+            return indexTrack;
+        },
+        function(newValue, oldValue){
+            if(oldValue > -1 && $scope.listaReproduccion[oldValue]){
+                var tema = $scope.listaReproduccion[oldValue];
+                tema.playing = false;
+            }
+        }
+    );
+    
+    $timeout(function(){
+        $window.dispatchEvent(new Event('resize'));
+    }, 0);
+    
+    function _catch(err){
+        $scope.msg = {
+            txt: '¡¡¡Ups, esto no puede ser, Pongale Play presenta problemas!!!',
+            type: 'error',
+            visible: true
+        };
+    };
+    
 }]);

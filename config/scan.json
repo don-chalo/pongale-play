@@ -1,0 +1,7 @@
+{
+	"path": "/",
+    "src": "D:/Mp3ses",
+    "modo": "w",
+    "noIncluir": [],
+    "tipos": ["mp3"]
+}

@@ -4,27 +4,27 @@ var BibliotecaSrv = angular.module('BibliotecaSrv', ['ngResource']);
 
 BibliotecaSrv.factory('BandaSrv', ['$resource',
     function($resource){
-		return $resource('/banda/:id', { id: '@id' }, {
-			getAll: { method: 'GET', params:{ }, isArray: true, cache: true },
-			get: { method: 'GET', params:{ }, isArray: false, cache: true }
+		return $resource('/banda/:bandaid', { bandaid: '@bandaid' }, {
+			query: { method: 'GET', params:{ }, isArray: true },
+			get: { method: 'GET', params:{ }, isArray: false }
 		});
     }
 ]);
 
 BibliotecaSrv.factory('DiscoSrv', ['$resource',
     function($resource){
-		return $resource('/banda/:bandaId/disco/:discoId', { bandaId: '@bandaId', discoId: '@discoId' }, {
-			getAll: { method: 'GET', params:{ }, isArray: true, cache: true },
-			get: { method: 'GET', params:{ }, isArray: false, cache: true }
+		return $resource('/disco/:discoid', { bandaid: '@bandaid', discoid: '@discoid' }, {
+			query: { method: 'GET', params:{ }, isArray: true },
+			get: { method: 'GET', params:{ }, isArray: false }
 		});
     }
 ]);
 
 BibliotecaSrv.factory('TemaSrv', ['$resource',
     function($resource){
-		return $resource('/banda/:bandaId/disco/:discoId/tema/:indice/:opcion', { bandaId: '@bandaId', discoId: '@discoId', indice: '@indice', opcion: '@opcion' }, {
-			getAll: { method: 'GET', params:{ }, isArray: true, cache: true },
-			get: { method: 'GET', params:{ }, isArray: false, cache: true }
+		return $resource('/tema/:temaid/:opcion', { discoid: '@discoid', temaid: '@temaid', opcion: '@opcion' }, {
+			query: { method: 'GET', params:{ }, isArray: true },
+			get: { method: 'GET', params:{ }, isArray: false }
 		});
     }
 ]);

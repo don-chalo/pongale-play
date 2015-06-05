@@ -2,31 +2,43 @@ var express = require('express');
 var path = require('path');
 var favicon = require('static-favicon');
 var morgan = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var fs = require('fs');
 
-var Lector = require('./init-app/cargarData');
-var config = require('./config.json');
+var config = require('./config/scan.json');
 
-var routes = require('./routes/index');
-var bandaRoutes = require('./routes/Banda-Routes');
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.set('view cache', 'production' === process.env.NODE_ENV);
 
 app.use(favicon());
-app.use(morgan('dev'));
+app.use(morgan( 'production' === process.env.NODE_ENV ? 'tiny' : 'dev' ));
+app.set('x-powered-by', !('production' === process.env.NODE_ENV));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/banda', bandaRoutes);
-app.use('/', routes);
+/* (+) Inicializa la aplicación, leyendo los modulos existentes en la carpeta bootstrap */
+var _modules = fs.readdirSync('./bootstrap/');
+var _module = undefined;
+
+_modules.forEach(function(item){
+    _fc = require('./bootstrap/' + item);
+    
+    if(typeof _fc === 'function'){
+        _fc();
+    }
+});
+/* (-) */
+
+//Configura las rutas.
+require('./routes/routes')(app);
+
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -59,11 +71,32 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
-/* (+) Inicializar base de datos */
-new Lector(config).execute(function(){
-    console.log('DB inicializada');
+process.on('uncaughtException', function(err){
+    console.error(err.stack);
+    console.error(err.message);
+    process.exit(1);
 });
-/* (-) Inicializar base de datos */
 
-module.exports = app;
+process.on('SIGINT', function(){
+    server.close();
+    process.exit(1);
+});
+
+process.on('error', function(){
+    console.log('no se pudo terminar correctamente el proceso.');
+});
+
+
+app.set('port', process.env.PORT || 30010);
+
+if(require.main === module){
+    
+    var server = app.listen(app.get('port'), function() {
+        console.log('Express server listening on port ' + app.get('port'));
+    });
+    
+}else{
+    console.info('Running app as a module');
+    
+    module.exports = app;
+}

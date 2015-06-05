@@ -3,3 +3,5 @@
 /lib/
 /node_modules/
 /nightwatch_bkp.json.txt
+/public/stylesheets/audioapp.css
+/public/stylesheets/audioapp-white-theme.css

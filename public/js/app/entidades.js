@@ -1,24 +1,23 @@
 'use strict';
 
-var entities = angular.module('Entidades', []);
+var entities = angular.module('Entidades', ['ngCookies']);
 
 entities.factory('audio', ['$document', function($document){
     var audio = $document[0].createElement('audio');
-    var vol = 10;
     var isPlaying = false;
     var isPaused = false;
-    var isStoped = false;
+    var state = '';
+    var vol = 10;
+    var volMax = 100;
+    var volMin = 0;
     
-    function playing(){ isPlaying = true; isPaused = false; isStoped = false };
-    function stoped(){ isPlaying = false; isPaused = false; isStoped = true };
-    function paused(){ isPlaying = false; isPaused = true; isStoped = false };
-    
-    stoped();
+    function playing(){ isPlaying = true; isPaused = false; state = 'playing'; };
+    function paused(){ isPlaying = false; isPaused = true; state = 'paused'; };
     
     return {
         playing: function(){ return isPlaying; },
         paused: function(){ return isPaused; },
-        stoped: function(){ return isStoped; },
+        getState: function(){ return state; },
         play: function(filename, type) {
             audio.src = filename;
             audio.type = type;
@@ -28,14 +27,6 @@ entities.factory('audio', ['$document', function($document){
         pause: function(){
             audio.pause();
             paused();
-            return isPlaying;
-        },
-        stop: function(){
-            if(isPlaying){
-                audio.currentTime = 0;
-                audio.pause();
-                stoped();
-            }
             return isPlaying;
         },
         togglePlayPause: function(){
@@ -50,13 +41,15 @@ entities.factory('audio', ['$document', function($document){
         },
         setVolume: function(value){
             value = parseInt(value);
-            vol = value > 10 ? 10 : (value < 0 ? 0 : value);
-            audio.volume = vol / 10;
+            vol = value > volMax ? volMax : (value < volMin ? volMin : value);
+            audio.volume = parseFloat( vol / volMax );
             return vol;
         },
         addVolume: function(){
             return this.setVolume(vol + 1);
         },
+        getVolumeMin: function(){ return volMin; },
+        getVolumeMax: function(){ return volMax; },
         restVolume: function(){
             return this.setVolume(vol - 1);
         },
@@ -76,10 +69,53 @@ entities.factory('audio', ['$document', function($document){
                 fc(audio.duration, audio.currentTime);
             });
         },
-        error: function(cb){
+        error: function(fc){
             audio.addEventListener('error', function(err){
-                cb(err);
+                fc(err);
             });
         }
     };
-}]);
+}])
+.factory('listaReproduccion', function(){
+    
+    /*
+     * La idea de esta entidad es que esté integrado con con un almacenamiento más permanente para la lista de reproducción.
+     */
+    
+    var listaReproduccion = new Array();
+    
+    if(typeof Storage === 'undefined'){
+
+        listaReproduccion.addItem = function(item){
+            this.push(item);
+        };
+
+        listaReproduccion.setArray = function(array){
+            var self = this;
+            self.removeAll();
+            array.forEach(function(item, index){ self.push( item ); });
+        };
+
+        listaReproduccion.removeAll = function(){ this.length = 0; };
+    }else{
+        listaReproduccion.addItem = function(item){
+            this.push( item );
+            localStorage.listaReproduccion = angular.toJson( this );
+        }
+        listaReproduccion.setArray = function(_array){
+            var self = this;
+            self.removeAll();
+            _array.forEach(function(item){ self.addItem( item ); });
+        }
+        listaReproduccion.removeAll = function(){ this.length = 0; localStorage.listaReproduccion = angular.toJson( [] ); }
+        
+        if(typeof localStorage.listaReproduccion === 'undefined'){
+            listaReproduccion.removeAll();
+        }
+
+        var _array = angular.fromJson( localStorage.listaReproduccion );
+        listaReproduccion.setArray( _array );
+    }
+    
+    return listaReproduccion;
+});

@@ -1,11 +1,16 @@
 'use strict';
 
-angular.module('Componentes', ['Entidades', 'Librerias']).directive('metadataTema', function(){
+angular.module('Componentes', ['Entidades', 'Librerias', 'BibliotecaSrv'])
+.directive('metadataTema', function(){
     return {
         restrict: 'E',
         transclude: true,
+        controllerAs: 'metadataCtrl',
         scope: { mostrarMetadata: '=show', metadata: '=value' },
         link: function($scope, element, attrs, ctrl){
+            ctrl.hideMetadata = function(){
+                $scope.mostrarMetadata = false;
+            };
         },
         controller: function($scope){
             /*
@@ -17,35 +22,64 @@ angular.module('Componentes', ['Entidades', 'Librerias']).directive('metadataTem
             );
             */
         },
-        template: jQuery('script#metadata').html(),
+        templateUrl: 'metadata',
         replace: true
     };
-}).directive('trackInfo', ['audio', 'formatearSegundos', function(audio, FormatearSegundos){
+}).directive('range', [function(){
     return {
         restrict: 'E',
         transclude: true,
-        scope: { info: '=track' },
+        controllerAs: 'ctrl',
+        scope: { current: '=current', max:"=max" },
         link: function($scope, element, attrs, ctrl){
+            $scope.select = function($index, $event){
+                
+                $scope.values.forEach(function(item, i){
+                    item.r = false;
+                });
+                for(var i = 0; i <= $index; i++){
+                    $scope.values[ i ].r = true;
+                }
+                
+                $scope.current = parseInt( $index );
+
+                if(typeof $scope.$parent[attrs.handler] === 'function'){
+                    $scope.$parent[attrs.handler]( $index, $event );
+                }
+            };
         },
         controller: function($scope){
-            $scope.buscando = function(){
-                audio.setCurrentTime( $scope.rangeCurrentTime );
-            };
-            
-            audio.timeupdate( function(duration, currentTime) {
-                $scope.$apply(function() {
-                    if(duration){
-                        $scope.duration = FormatearSegundos(duration);
-                        $scope.rangeDuration = duration;
+
+            $scope.$watch(
+                function(){
+                    return $scope.max;
+                },
+                function(newValue, oldValue){
+                    if(typeof newValue === 'undefined'){
+                        $scope.values = [ { r: false } ];
+                        $scope.width = '100%';
+                    }else{
+                        $scope.values = [];
+                        for(var i = 0; i <= parseInt( newValue ); i++){
+                            $scope.values.push( { r: false } );
+                        }
+                        $scope.width = ( 100 / $scope.values.length ) + '%';
                     }
-                    if(currentTime){
-                        $scope.currentTime = FormatearSegundos(currentTime);
-                        $scope.rangeCurrentTime = currentTime;
+                }
+            );
+
+            $scope.$watch(
+                function(){
+                    return $scope.current;
+                },
+                function(){
+                    if(typeof $scope.current !== 'undefined'){
+                        $scope.values[ parseInt( $scope.current ) ].r = true;
                     }
-                });
-            });
+                }
+            );
         },
-        template: jQuery('script#info').html(),
+        templateUrl: 'range',
         replace: true
     };
 }]).directive('ngRightClick', function($parse) {
