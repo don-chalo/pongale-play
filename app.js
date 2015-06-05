@@ -78,7 +78,7 @@ process.on('uncaughtException', function(err){
 });
 
 process.on('SIGINT', function(){
-    server.close();
+    if(server) server.close();
     process.exit(1);
 });
 
