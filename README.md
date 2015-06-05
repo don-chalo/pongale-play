@@ -26,7 +26,7 @@ El atributo `tipos` es para indicar los formatos soportados, pero actualmente so
 Ejemplo:
 ```
 {
-    "path": "C:/Musica/Bill Evans",
+    "path": "/Bill Evans",
     "src": "C:/Musica",
     "modo": "w",
     "noIncluir": [],
