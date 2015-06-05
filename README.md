@@ -9,7 +9,7 @@ Corre en tu computador que contiene tus archivos de audio y accede a la aplicaci
 
 Instalar con los siguientes comandos:
 ```
-git clone https://github.com/donchalo/pongale-play.git
+git clone https://github.com/don-chalo/pongale-play.git
 cd PongalePlay/
 npm install
 ```
