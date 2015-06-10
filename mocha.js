@@ -1,1 +1,0 @@
-require('mocha/bin/mocha');

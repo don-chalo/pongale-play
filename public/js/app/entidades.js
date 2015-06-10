@@ -7,16 +7,29 @@ entities.factory('audio', ['$document', function($document){
     var isPlaying = false;
     var isPaused = false;
     var state = '';
-    var vol = 10;
+    var vol = 0;
     var volMax = 100;
     var volMin = 0;
     
+    if(typeof Storage === 'undefined'){
+        var setPersistVol = function(vol){};
+        var getPersistVol = function(){ return vol; };
+    }else{
+        var setPersistVol = function(vol){ window.localStorage.volume = vol; };
+        var getPersistVol = function(){
+            if(typeof window.localStorage.volume === 'undefined') window.localStorage.volume = 0;
+            return parseInt( window.localStorage.volume );
+        };
+    }
+    
     function playing(){ isPlaying = true; isPaused = false; state = 'playing'; };
     function paused(){ isPlaying = false; isPaused = true; state = 'paused'; };
+    function stoped(){ isPlaying = false; isPaused = false; state = 'stoped'; };
     
     return {
         playing: function(){ return isPlaying; },
         paused: function(){ return isPaused; },
+        stoped: function(){ return !isPaused && !isPlaying; },
         getState: function(){ return state; },
         play: function(filename, type) {
             audio.src = filename;
@@ -43,26 +56,29 @@ entities.factory('audio', ['$document', function($document){
             value = parseInt(value);
             vol = value > volMax ? volMax : (value < volMin ? volMin : value);
             audio.volume = parseFloat( vol / volMax );
+            setPersistVol( vol );
             return vol;
         },
-        addVolume: function(){
-            return this.setVolume(vol + 1);
+        getVolume: function(){
+            return getPersistVol();
         },
-        getVolumeMin: function(){ return volMin; },
         getVolumeMax: function(){ return volMax; },
-        restVolume: function(){
-            return this.setVolume(vol - 1);
-        },
         toggleMute: function(){
             audio.muted = !audio.muted;
             return audio.muted;
         },
         getDuration: function(){ return audio.duration; },
-        setDuration: function(duration){ audio.duration = duration; },
         getCurrentTime: function(){ return audio.currentTime; },
-        setCurrentTime: function(currentTime){ audio.currentTime = currentTime; },
+        setCurrentTime: function(currentTime){
+            currentTime = parseInt( currentTime );
+            //Con este "if" permitimos la existencia de solo un "TimeRanges" en objeto "buffered".
+            if(audio.buffered.length > 0 && audio.buffered.start(0) <= currentTime && audio.buffered.end(0) >= currentTime){
+                audio.currentTime = currentTime;
+            }
+        },
         ended: function(fc){
             audio.addEventListener('ended', fc);
+            stoped();
         },
         timeupdate: function(fc){
             audio.addEventListener('timeupdate', function(ev){
@@ -77,10 +93,6 @@ entities.factory('audio', ['$document', function($document){
     };
 }])
 .factory('listaReproduccion', function(){
-    
-    /*
-     * La idea de esta entidad es que esté integrado con con un almacenamiento más permanente para la lista de reproducción.
-     */
     
     var listaReproduccion = new Array();
     
@@ -100,20 +112,21 @@ entities.factory('audio', ['$document', function($document){
     }else{
         listaReproduccion.addItem = function(item){
             this.push( item );
-            localStorage.listaReproduccion = angular.toJson( this );
+            window.localStorage.listaReproduccion = angular.toJson( this );
         }
         listaReproduccion.setArray = function(_array){
             var self = this;
             self.removeAll();
             _array.forEach(function(item){ self.addItem( item ); });
         }
-        listaReproduccion.removeAll = function(){ this.length = 0; localStorage.listaReproduccion = angular.toJson( [] ); }
+        listaReproduccion.removeAll = function(){ this.length = 0; window.localStorage.listaReproduccion = angular.toJson( [] ); }
         
-        if(typeof localStorage.listaReproduccion === 'undefined'){
+        if(typeof window.localStorage.listaReproduccion === 'undefined'){
             listaReproduccion.removeAll();
         }
 
-        var _array = angular.fromJson( localStorage.listaReproduccion );
+        var _array = angular.fromJson( window.localStorage.listaReproduccion );
+        _array.forEach(function(item){ item.playing = false; });
         listaReproduccion.setArray( _array );
     }
     

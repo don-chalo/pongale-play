@@ -176,13 +176,13 @@ function LeerArchivos(_archivos, _bandasExistentes){
             if(/^\d{1,4}\ \-\ /.test(metadata.title)){
                 nombreTema = metadata.title.replace(/^\d{1,4}\ \-\ /, '');
             }else{
-                nombreTema = metadata.title;
+                nombreTema = metadata.title ? metadata.title : "sin nombre" ;
             }
 
             tema.nombre = nombreTema;
             tema.numero = metadata.track.no;
 
-            tema.banda = metadata.artist[0];
+            tema.banda = metadata.artist[0] ? metadata.artist[0] : "artista desconocido" ;
 
             var nombreDisco;
             if(/^\d+\ \-\ /.test(metadata.album)){
@@ -190,7 +190,7 @@ function LeerArchivos(_archivos, _bandasExistentes){
             }else if(/^\d+\.\d+\ \-\ /.test(metadata.album)){
                 nombreDisco = metadata.album.replace(/^\d+\.\d+\ \-\ /, '');
             }else{
-                nombreDisco = metadata.album;
+                nombreDisco = metadata.album ? metadata.album : "disco desconocido" ;
             }
 
             tema.disco = nombreDisco;

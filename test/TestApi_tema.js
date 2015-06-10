@@ -113,7 +113,7 @@ describe('Servicio rest /tema,', function () {
             request
                 .get({
                         json: true,
-                        url: url + '/123456789012345678901234',
+                        url: url + '/1234567890123456',
                         timeout: 60000
                     },
                     function (_err, _response2, _body) {
@@ -184,7 +184,7 @@ describe('Servicio rest /tema,', function () {
             request
                 .get({
                         json: true,
-                        url: url + '/123456789012345678901234/metadata',
+                        url: url + '/1234567890123456/metadata',
                         timeout: 60000
                     },
                     function (_err, _response2, _body) {
@@ -334,38 +334,6 @@ describe('Servicio rest /tema,', function () {
         });
     });
 
-    describe('Cuando realizo la query /tema?bandaid=49,', function(){
-        var response;
-
-        before(function(done){
-            request
-                .get({
-                        json: true,
-                        url: url + '?bandaid=49',
-                        timeout: 60000
-                    },
-                    function (_err, _response, _body) {
-                        response = _response;
-                        done();
-                    }
-                );
-        });
-
-        after(function(){  });
-        beforeEach(function(){  });
-        afterEach(function(){  });
-
-        it('response no es null', function () {
-            should.exist(response);
-        });
-        it('response.status es un 400', function () {
-            response.statusCode.should.be.equal(400);
-        });
-        it('response.body es un Object', function () {
-            response.body.should.be.an.Object;
-        });
-    });
-
     describe('Cuando realizo la query /tema?disco=The,', function(){
         var response;
 
@@ -427,38 +395,6 @@ describe('Servicio rest /tema,', function () {
         });
         it('response.body es un Array', function () {
             response.body.should.be.an.Array;
-        });
-    });
-
-    describe('Cuando realizo la query /tema?discoid=89,', function(){
-        var response;
-
-        before(function(done){
-            request
-                .get({
-                        json: true,
-                        url: url + '?discoid=89',
-                        timeout: 60000
-                    },
-                    function (_err, _response, _body) {
-                        response = _response;
-                        done();
-                    }
-                );
-        });
-
-        after(function(){  });
-        beforeEach(function(){  });
-        afterEach(function(){  });
-
-        it('response no es null', function () {
-            should.exist(response);
-        });
-        it('response.status es un 400', function () {
-            response.statusCode.should.be.equal(400);
-        });
-        it('response.body es un Object', function () {
-            response.body.should.be.an.Object;
         });
     });
 

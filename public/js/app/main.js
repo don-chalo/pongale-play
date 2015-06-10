@@ -7,100 +7,84 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
     var self = this;
     var indexTrack = -1;
     
-    $scope.volMin = audio.getVolumeMin();
     $scope.volMax = audio.getVolumeMax();
     
     $scope.bandas = [];
     $scope.banda = {};
+    $scope.discos = [];
     $scope.disco = {};
+    $scope.temas = [];
+    $scope.tema = {};
     $scope.listaReproduccion = listaReproduccion;
     $scope.info = {};
     $scope.infoPopUp = {};
     $scope.menu = {};
-
     $scope.muted = false;
 
     /* (+) Volume */
     $scope.$watch('volume', function(newValue, oldValue){
         var volume = parseInt( newValue ? newValue : 0 );
         audio.setVolume( volume );
-        $scope.labelVolume = (volume == $scope.volMin ? 'min' : (volume == $scope.volMax ? 'max' : volume));
+        $scope.labelVolume = (volume == 0 ? 'min' : (volume == $scope.volMax ? 'max' : volume));
     });
     
-    self.showVolumeRange = function(){
-        $scope.showVolumeRange = true;
-    };
-    self.hideVolumeRange = function(){
-        $scope.showVolumeRange = false;
-    };
     $scope.setVolume = function($index, $event){
         $scope.volume = parseInt( $index );
     };
+    $scope.setVolume( audio.getVolume() );
     /* (-) Volume */
     
     self.seleccionarBanda = function(id){
 
-        var banda = _.findWhere( $scope.bandas, { _id: id } );
-        
-        $scope.bandas.forEach(function(item){ item.selected = false; });
-        
-        banda.selected = true;
-        
+        $scope.banda.selected = false;;
+        $scope.banda = _.find( $scope.bandas, { _id: id } );
+        $scope.banda.selected = true;
         $scope.disco = {};
+        $scope.temas = [];
+        $scope.discos.cargando = true;
         
-        var _discos = discoSrv.query({ order : 'ano=1', bandaid: banda._id }, function($discos){
-            $scope.banda = { _id: banda._id, nombre: banda.nombre, discos: _.sortBy(_discos, "ano") };
+        var _discos = discoSrv.query({ order : 'ano=1', bandaid: $scope.banda._id }, function($discos){
+            $scope.discos = $discos;
         });
         
+        _discos.$promise.finally(function(){ $scope.discos.cargando = false });
         _discos.$promise.catch(_catch);
     };
     
     self.seleccionarAlbum = function(index){
         
-        var disco = $scope.banda.discos[index];
+        $scope.disco.selected = false;
+        $scope.disco = $scope.discos[index];
+        $scope.disco.selected = true;
+        $scope.temas.cargando = true;
 
-        $scope.banda.discos.forEach(function(item){ item.selected = false; });
-        
-        disco.selected = true;
-        
-        var _temas = temaSrv.query({ discoid: disco._id, order: 'numero=1' } , function($temas){
-            $scope.disco = { _id: disco._id, bandaId: $scope.banda._id, nombre: disco.nombre, ano: disco.ano ,temas: _.sortBy(_temas, "numero"), bandaNombre: $scope.banda.nombre };
+        var _temas = temaSrv.query({ discoid: $scope.disco._id, order: 'numero=1' } , function($temas){
+            $scope.temas = $temas;
         });
         
+        _temas.$promise.finally(function(){ $scope.temas.cargando = false; });
         _temas.$promise.catch(_catch);
     };
     
-    self.agregarDiscoALista = function(){
+    self.agregarDiscoALista = function( _index, _cb){
         
-        var cb = function() {};
-        
-        if(arguments.length > 0){            
-            if(typeof arguments[0] === 'number'){
-                var disco = $scope.banda.discos[ arguments[0] ];
-            }else if(typeof arguments[0] === 'function'){
-                cb = arguments[0];
-                var disco = _.findWhere( $scope.banda.discos, { selected: true } );
-            }
-        }else{
-            var disco = _.findWhere( $scope.banda.discos, { selected: true } );
-        }
+        var disco = $scope.discos[ _index ];
+        var cb = _cb ? _cb : function() {};
 
         var _temas = temaSrv.query({ discoid: disco._id, order: 'numero=1' }, function($temas){
             
-            _temas = _.sortBy( _temas, "numero" );
-            
-            for(var i = 0; i < _temas.length; i++){
+            for(var i = 0; i < $temas.length; i++){
                 $scope.listaReproduccion.addItem({
                     playing: false,
-                    temaId: _temas[i]._id,
-                    numero: _temas[i].numero,
-                    nombre: _temas[i].nombre,
-                    discoNombre: disco.nombre,
-                    discoId: disco._id,
-                    discoAno: disco.ano,
-                    bandaNombre: $scope.banda.nombre,
-                    bandaId: $scope.banda._id,
-                    url: '/tema/' + _temas[i]._id + '/metadata'
+                    temaId: $temas[i]._id,
+                    numero: $temas[i].numero,
+                    nombre: $temas[i].nombre,
+                    disco: $temas[i].disco,
+                    discoid: $temas[i].discoid,
+                    discoAno: $temas[i].ano,
+                    banda: $temas[i].banda,
+                    bandaid: $temas[i].bandaid,
+                    url: '/tema/' + $temas[i]._id + '/metadata'
                 });
             }
             
@@ -108,8 +92,6 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         });
 
         _temas.$promise.catch(_catch);
-        
-        $scope.menu.discos = false;
     };
     self.agregarTemaALista = function(){
         
@@ -117,87 +99,88 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         
         if(arguments.length > 0){
             if(typeof arguments[0] === 'number'){
-                var tema = $scope.disco.temas[ arguments[0] ];
+                var tema = $scope.temas[ arguments[0] ];
+                cb = arguments[1] ? arguments[1] : cb;
             }else if(typeof arguments[0] === 'function'){
                 cb = arguments[0];
-                var tema = _.findWhere( $scope.disco.temas, { selected: true } );
+                var tema = $scope.tema;
             }
         }else{
-            var tema = _.findWhere( $scope.disco.temas, { selected: true } );
+            var tema = $scope.tema;
         }
-
+        
         $scope.listaReproduccion.addItem({
             playing: false,
             temaId: tema._id,
             numero: tema.numero,
             nombre: tema.nombre,
-            discoNombre: $scope.disco.nombre,
-            discoId: $scope.disco._id,
-            discoAno: $scope.disco.ano,
-            bandaNombre: $scope.disco.bandaNombre,
-            bandaId: $scope.disco.bandaId,
-            url: '/banda/' + $scope.disco.bandaId + '/disco/' + $scope.disco._id + '/tema/' + tema._id + '/metadata'
+            disco: tema.disco,
+            discoid: tema.discoid,
+            discoAno: tema.ano,
+            banda: tema.banda,
+            bandaid: tema.bandaid,
+            url: '/banda/' + tema.bandaid + '/disco/' + tema.discoid + '/tema/' + tema._id + '/metadata'
         });
-        
+
         cb();
         
         $scope.menu.temas = false;
     };
 
     self.reproducir = function(){
-        var cb = function(){};
-        
         if(arguments.length > 0){
-            if(typeof arguments[0] === 'number'){
-                var index = arguments[0];
-                var tema = $scope.listaReproduccion[ index ];
-            }else if(typeof arguments[0] === 'function'){
-                cb = arguments[0];
-                var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
-                var index = $scope.listaReproduccion.indexOf( tema );
-            }
+            var index = arguments[0];
+            var tema = $scope.listaReproduccion[ index ];
         }else{
-            var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
+            var tema = _.find( $scope.listaReproduccion, { selected: true } );
             var index = $scope.listaReproduccion.indexOf( tema );
         }
+        if(typeof tema !== 'undefined'){
+            var _tema = temaSrv.get({ temaid: tema.temaId, opcion: 'metadata' }, function($tema){
+                $scope.info = _tema;
+                var url = '/tema/' + tema.temaId + '/stream';
+                var tocando = audio.play(url, _tema.contentType);
 
-        var _tema = temaSrv.get({ temaid: tema.temaId, opcion: 'metadata' }, function($tema){
-            $scope.info = _tema;
-            var url = '/tema/' + tema.temaId + '/stream';
-            var tocando = audio.play(url, _tema.contentType);
-            
-            if(tocando){
-                tema.playing = true;
-                indexTrack = index;
-            }
-        });
-        
-        _tema.$promise.catch(_catch);
-        
-        $scope.menu.lista = false;
+                if(tocando){
+                    tema.playing = true;
+                    indexTrack = index;
+                }
+            });
+
+            _tema.$promise.catch(_catch);
+
+            $scope.menu.lista = false;
+        }
     };
     self.reproducirTema = function(){
         $scope.listaReproduccion.removeAll();
-        self.agregarTemaALista( function(){ self.reproducir( 0 ); } );
-        
-        $scope.menu.temas = false;
+        if(arguments.length === 0){
+            self.agregarTemaALista( function(){ self.reproducir( 0 ); } );
+            $scope.menu.temas = false;
+        }else{
+            var _index = parseInt( arguments['0'] );
+            self.agregarTemaALista( _index, function(){ self.reproducir( 0 ); } );
+        }
     };
-    self.reproducirDisco = function(){
+    self.reproducirDisco = function(_index){
         $scope.listaReproduccion.removeAll();
-        self.agregarDiscoALista( function(){ self.reproducir( 0 ); } );
-        
-        $scope.menu.discos = false;
+        _index = parseInt( _index );
+        self.agregarDiscoALista( _index, function(){ self.reproducir( 0 ); } );
     };
     
+    //Selecciona un tema de la lista de temas.
     self.seleccionarTema = function(index){
-        $scope.disco.temas.forEach(function(item){ item.selected = false; });
-        $scope.disco.temas[index].selected = true;
+        $scope.tema.selected = false;
+        $scope.tema = $scope.temas[index];
+        $scope.tema.selected = true;
     };
+    
+    //selecciona un tema de la lista de reproducción.
     self.select = function(index, $event){
         if($event.ctrlKey){
             $scope.listaReproduccion[index].selected = !$scope.listaReproduccion[index].selected;
         }else if($event.shiftKey){
-            var index_1 = $scope.listaReproduccion.indexOf( _.findWhere( $scope.listaReproduccion, { selected: true } ) );
+            var index_1 = $scope.listaReproduccion.indexOf( _.find( $scope.listaReproduccion, { selected: true } ) );
             if(index_1 > index){
                 for(var i = index; i <= index_1; i++){
                     $scope.listaReproduccion[i].selected = true;
@@ -224,19 +207,33 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         }
     };
     self.togglePlayPause = function(){
-        audio.togglePlayPause();
+        if(audio.stoped()){
+            var _index = -1;
+            var _selected = _.find( $scope.listaReproduccion, function(item, index){ if(item.selected){ _index = index; } return item.selected; } );
+            if(_selected){
+                self.reproducir( _index );
+            }else{
+                self.reproducir( 0 )
+            }
+        }else{
+            audio.togglePlayPause();
+        }
     };
     self.mute = function(){
         $scope.muted = audio.toggleMute();
     };
     self.limpiarLista = function(){
         $scope.listaReproduccion.removeAll();
+        indexTrack = -1;
     };
     
     /* (+) Buscador tema (range) */
     $scope.buscador = function(index, event){
         audio.setCurrentTime ( parseInt( index ? index : 0 ) );
     };
+    $scope.formatBuscador = function( segundos ){
+        return FormatearSegundos(segundos);
+    }
     
     audio.timeupdate( function(duration, currentTime) {
         $scope.$apply(function() {
@@ -272,7 +269,7 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         _tema.$promise.catch(_catch);
     };
     self.mostrarInfoLista = function(){
-        var tema = _.findWhere( $scope.listaReproduccion, { selected: true } );
+        var tema = _.find( $scope.listaReproduccion, { selected: true } );
 
         MostrarInfo( tema );
         
@@ -280,12 +277,10 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
     };
     self.mostrarInfoTema = function(){
         
-        var tema = _.findWhere( $scope.disco.temas, { selected: true } );
-
         var track = {
-            temaId: tema._id,
-            discoId: $scope.disco._id,
-            bandaId: $scope.disco.bandaId,
+            temaId: $scope.tema._id,
+            discoid: $scope.tema.discoid,
+            bandaid: $scope.tema.bandaid,
             opcion: 'metadata'
         };
         
@@ -315,13 +310,6 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         
         self.seleccionarTema($index);
     };
-    self.menuListaDiscos = function($index, $event){
-        $scope.menu.left = $event.pageX;
-        $scope.menu.top = $event.pageY;
-        $scope.menu.discos = true;
-        
-        self.seleccionarAlbum($index);
-    };
     self.hideMsg = function(){
         $scope.msg.visible = false;
     };
@@ -336,19 +324,6 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         $scope.infoPopUp.show = false;
     };
     
-    $scope.paneles = {};
-    $scope.paneles['column-bandas'] = true;
-    $scope.paneles['column-discos'] = true;
-    $scope.paneles['column-temas'] = true;
-    $scope.paneles['column-lista'] = true;
-
-    self.showPanel = function($event, element){
-        $scope.paneles[element] = true;
-    };
-    self.hidePanel = function($event, element){
-        $scope.paneles[element] = false;
-    };
-    
     audio.ended( function() { self.nextTrack(); });
     
     var _bandas = bandaSrv.query({ order : 'nombre=1' }, function($result, header){
@@ -358,7 +333,13 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
     _bandas.$promise.catch(_catch);
     
     function EliminarTemasSeleccionados(){
+        var _prev = 0;
+        //Cuento los temas anteriores al indexTrack (tema actualmente tocandose).
+        $scope.listaReproduccion.forEach( function(item, index){ if(item.selected && index <= indexTrack){ _prev++; } } );
+        //Elimino los temas seleccionados.
         $scope.listaReproduccion.setArray( _.reject( $scope.listaReproduccion, function(tema){ return tema.selected; } ) );
+        //disminuyo el indexTrack como tantos temas seleccionados anteriores existan.
+        indexTrack -= _prev;
     }
     
     $window.addEventListener('resize', function(){
@@ -370,12 +351,12 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
     $scope.hideMenu = function(){
         $scope.menu.lista = false;
         $scope.menu.temas = false;
-        $scope.menu.discos = false;
     };
     
     function getEstado(){ 
-        if($scope.playing) return '';
         if($scope.paused) return '[pausa]';
+        if($scope.playing) return '[tocando]';
+        else return '';
     };
     
     $scope.$watch('info', function(newValue, oldValue){
@@ -389,6 +370,7 @@ app.controller('AudioController', ['listaReproduccion', '$timeout', '$window', '
         function(newValue, oldValue){
             $scope.playing = audio.playing();
             $scope.paused = audio.paused();
+            $scope.stoped = audio.stoped();
             
             $document.context.title = $scope.info.title ? getEstado() + $scope.info.artist[0] + '  - ' + $scope.info.title : 'PongalePlay';
         }

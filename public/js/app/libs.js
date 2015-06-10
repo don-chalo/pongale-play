@@ -8,9 +8,12 @@ angular.module('Librerias', [])
                     segundos = segundos - (horas * 3600);
 
                     var minutos  = parseInt( segundos / 60 );
-                    segundos = segundos - (minutos * 60);
+                    segundos = parseInt(segundos - (minutos * 60));
 
-                    return { horas: horas, minutos: minutos, segundos: parseInt(segundos) };
+                    minutos = minutos < 10 ? "0" + minutos : minutos;
+                    segundos = segundos < 10 ? "0" + segundos : segundos;
+                    
+                    return { horas: horas.toString(), minutos: minutos.toString(), segundos: segundos.toString() };
                 }
         };
     }).factory('getKeyEventCode', function(){

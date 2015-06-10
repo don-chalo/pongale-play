@@ -1,6 +1,5 @@
-var RoutesUtils = require('../services/controllers-utils');
-
-var DiscoModel = require('../models/Disco');
+var RoutesUtils = require( '../services/controllers-utils' );
+var DiscoModel = require( '../models/Disco' );
 
 module.exports = {
     find: function(req, res) {
@@ -30,7 +29,7 @@ module.exports = {
             query.genero = req.query.genero;
         }
         if(req.query.bandaid){
-            if(/^[0-9a-zA-Z]{16}$/.test(req.query.bandaid)){
+            if(/^[0-9a-zA-Z]{1,}$/.test(req.query.bandaid)){
                 query.bandaid = req.query.bandaid;
             }else{
                 return res.status(400).json({ message: 'error, valor incorrecto [bandaid = "' + req.query.bandaid + '"].' });
@@ -56,7 +55,7 @@ module.exports = {
     },
     findOne: function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.discoid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.discoid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [' + req.params.discoid + '].' });
         }
 

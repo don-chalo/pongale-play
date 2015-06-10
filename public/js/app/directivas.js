@@ -13,14 +13,6 @@ angular.module('Componentes', ['Entidades', 'Librerias', 'BibliotecaSrv'])
             };
         },
         controller: function($scope){
-            /*
-            $scope.$watch(
-                function(scope){
-                    console.log('generando caratula');
-                    console.log(scope.metadata);
-                }
-            );
-            */
         },
         templateUrl: 'metadata',
         replace: true
@@ -30,30 +22,32 @@ angular.module('Componentes', ['Entidades', 'Librerias', 'BibliotecaSrv'])
         restrict: 'E',
         transclude: true,
         controllerAs: 'ctrl',
-        scope: { current: '=current', max:"=max" },
+        scope: { max:"=max", current: '=current' },
         link: function($scope, element, attrs, ctrl){
             $scope.select = function($index, $event){
-                
-                $scope.values.forEach(function(item, i){
-                    item.r = false;
-                });
-                for(var i = 0; i <= $index; i++){
-                    $scope.values[ i ].r = true;
-                }
-                
-                $scope.current = parseInt( $index );
-
                 if(typeof $scope.$parent[attrs.handler] === 'function'){
                     $scope.$parent[attrs.handler]( $index, $event );
                 }
             };
+            
+            /* Tooltip habilitado solo si el atributo tiene un valor. */
+            if(typeof attrs.formatearTooltip !== "undefined"){
+                var _format = typeof $scope.$parent[attrs.formatearTooltip] === "function" ? $scope.$parent[attrs.formatearTooltip] : function(_v){ return _v; };
+            
+                $scope.mostrarTooltip = function( $event, bloque ){
+                    if(bloque){
+                        var obj = _format( bloque )
+                        $scope.valor = (obj.horas === "0" ? '': obj.horas + ":") + obj.minutos + ":" + obj.segundos;
+                        $scope.mostrar = true;
+                    }
+                }
+                $scope.ocultarTooltip = function( $event ){
+                    $scope.mostrar = false;
+                }
+            }
         },
         controller: function($scope){
-
-            $scope.$watch(
-                function(){
-                    return $scope.max;
-                },
+            $scope.$watch("max",
                 function(newValue, oldValue){
                     if(typeof newValue === 'undefined'){
                         $scope.values = [ { r: false } ];
@@ -61,23 +55,22 @@ angular.module('Componentes', ['Entidades', 'Librerias', 'BibliotecaSrv'])
                     }else{
                         $scope.values = [];
                         for(var i = 0; i <= parseInt( newValue ); i++){
-                            $scope.values.push( { r: false } );
+                            $scope.values.push( { r: false, bloque: i } );
                         }
                         $scope.width = ( 100 / $scope.values.length ) + '%';
                     }
                 }
             );
-
-            $scope.$watch(
-                function(){
-                    return $scope.current;
-                },
-                function(){
-                    if(typeof $scope.current !== 'undefined'){
-                        $scope.values[ parseInt( $scope.current ) ].r = true;
+            
+            $scope.$watch("current",
+                function(newValue, oldValue){
+                    if(typeof oldValue !== 'undefined' && typeof $scope.values[ oldValue ] !== 'undefined'){
+                        $scope.values[ oldValue ].r = false;
                     }
-                }
-            );
+                    if(typeof newValue !== 'undefined' && typeof $scope.values[ newValue ] !== 'undefined'){
+                        $scope.values[ newValue ].r = true;
+                    }
+                });
         },
         templateUrl: 'range',
         replace: true

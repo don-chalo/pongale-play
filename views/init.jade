@@ -10,6 +10,7 @@ html(ng-app="PongalePlay")
         link(href='/stylesheets/foundation-icons/foundation-icons.css',rel='stylesheet',type="text/css")
         link(href='/stylesheets/angular-csp.css',rel='stylesheet',type="text/css")
         link(href='/stylesheets/audioapp-white-theme.css',rel='stylesheet',type="text/css")
+        link(href='/stylesheets/extra-fonts.css',rel='stylesheet',type="text/css")
 
         script(type="text/javascript", src="/js/libs/jquery-1.9.1.min.js")
         script(type="text/javascript", src="/js/libs/underscore-min.js")
@@ -32,9 +33,7 @@ html(ng-app="PongalePlay")
             div#column-bandas
                 div.panel-title
                     span bandas [{{bandas.length}}]
-                    i.fi-arrow-up.right(ng-hide="paneles['column-bandas']", ng-click="ctrl.showPanel($event, 'column-bandas')")
-                    i.fi-arrow-down.right(ng-show="paneles['column-bandas']", ng-click="ctrl.hidePanel($event, 'column-bandas')")
-                div.panel-body(ng-show="paneles['column-bandas']")
+                div.panel-body
                     div.buscardor-panel
                         i.fi-page-search
                         input#buscador.form-control(type="text",ng-model="query",ng-trim="true",placeholder="buscar...")
@@ -44,51 +43,50 @@ html(ng-app="PongalePlay")
             div#column-discos
                 div.panel-title
                     span {{banda.nombre}}
-                    span &nbsp;[discos {{' ' + (banda.discos.length ? banda.discos.length : 0)}}]
-                    i.fi-arrow-up.right(ng-hide="paneles['column-discos']", ng-click="ctrl.showPanel($event, 'column-discos')")
-                    i.fi-arrow-down.right(ng-show="paneles['column-discos']", ng-click="ctrl.hidePanel($event, 'column-discos')")
-                div.panel-body(ng-show="paneles['column-discos']")
+                    span(ng-show="discos.length") &nbsp;[discos {{' ' + (discos.length ? discos.length : 0)}}]
+                div.panel-body
                     div.lista.lista-discos
-                        div.lista-vacia(ng-show="!banda.discos") Selecciona una banda
-                        div.clearfix.selectable(ng-repeat="album in banda.discos", ng-class="{selected:album.selected}")
-                            div.small-11.columns(ng-click="ctrl.seleccionarAlbum($index)")
-                                span.item-detalle(ng-show="album.ano") {{album.ano}}&nbsp;-&nbsp;
-                                span(class="{{album.nombre ? 'item' : 'item-detalle'}}") {{album.nombre ? album.nombre : '[sin nombre]'}}
-                            div.small-1.columns.clickeable(ng-click="ctrl.menuListaDiscos($index, $event)"). ...
+                        div.lista-vacia(ng-show="discos.length === 0 && !discos.cargando") Selecciona una banda
+                        div.cargando(ng-show="discos.cargando") cargando...
+                        div.clearfix.selectable(ng-show="!discos.cargando",ng-repeat="album in discos", ng-class="{selected:album.selected}", ng-click="ctrl.seleccionarAlbum($index)")
+                            span.item-detalle(ng-show="album.ano") {{album.ano}}&nbsp;-&nbsp;
+                            span(class="{{album.nombre ? 'item' : 'item-detalle'}}") {{album.nombre ? album.nombre : '[sin nombre]'}}
+                            span.boton-info.right(ng-click="ctrl.agregarDiscoALista($index)")
+                                i.fi-plus.icon-14
+                            span.boton-play.right(ng-click="ctrl.reproducirDisco($index)")
+                                i.fi-play.icon-14
                 div.panel-title
                     span {{disco.nombre}}
-                    span &nbsp;[temas{{' ' + (disco.temas.length ? disco.temas.length : 0)}}]
-                    i.fi-arrow-up.right(ng-hide="paneles['column-temas']", ng-click="ctrl.showPanel($event, 'column-temas')")
-                    i.fi-arrow-down.right(ng-show="paneles['column-temas']", ng-click="ctrl.hidePanel($event, 'column-temas')")
-                div.panel-body(ng-show="paneles['column-temas']")
+                    span(ng-show="temas.length") &nbsp;[temas{{' ' + (temas.length ? temas.length : 0)}}]
+                div.panel-body
                     div.lista.lista-temas
-                        div.lista-vacia(ng-show="!disco.temas") Selecciona un disco
-                        div.clearfix.selectable(ng-repeat="tema in disco.temas", ng-class="{selected:tema.selected}")
-                            div.small-11.columns(ng-click="ctrl.seleccionarTema($index)")
-                                span.item-detalle(ng-show="tema.numero") {{tema.numero}}&nbsp;-&nbsp;
-                                span(class="{{tema.nombre ? 'item' : 'item-detalle'}}") {{tema.nombre ? tema.nombre : '[sin nombre]'}} &nbsp;
-                                span.item-detalle(ng-show="tema.discoNombre") [{{tema.discoNombre}}]
-                            div.small-1.columns.clickeable(ng-click="ctrl.menuListaTemas($index, $event)"). ...
+                        div.lista-vacia(ng-show="temas.length === 0 && !temas.cargando") Selecciona un disco
+                        div.cargando(ng-show="temas.cargando") cargando...
+                        div.clearfix.selectable(ng-show="!temas.cargando",ng-repeat="tema in temas", ng-class="{selected:tema.selected}", ng-click="ctrl.seleccionarTema($index)")
+                            span.item-detalle(ng-show="tema.numero") {{tema.numero}}&nbsp;-&nbsp;
+                            span(class="{{tema.nombre ? 'item' : 'item-detalle'}}") {{tema.nombre ? tema.nombre : '[sin nombre]'}} &nbsp;
+                            span.boton-info.right(ng-click="ctrl.menuListaTemas($index, $event)")
+                                i.icon-menu.icon-14
+                            span.boton-play.right(ng-click="ctrl.reproducirTema($index)")
+                                i.fi-play.icon-14
             div#column-lista
                 div.panel-title
-                    span lista de reproducci&oacute;n
-                    i.fi-arrow-up.right(ng-hide="paneles['column-lista']", ng-click="ctrl.showPanel($event, 'column-lista')")
-                    i.fi-arrow-down.right(ng-show="paneles['column-lista']", ng-click="ctrl.hidePanel($event, 'column-lista')")
-                div.panel-body(ng-show="paneles['column-lista']")
+                    span.titulo lista de reproducci&oacute;n
+                    span.limpiar.right(title="limpiar lista de reproducción",ng-click="ctrl.limpiarLista()")
+                        i.fi-trash
+                div.panel-body
                     div.lista.lista-reproduccion
                         div.lista-vacia(ng-show="listaReproduccion.length==0") No existen temas en la lista de reproducci&oacute;n
-                        div.clearfix.selectable(ng-repeat="track in listaReproduccion",ng-class="{playing:track.playing, selected:track.selected}")
-                            div.small-11.columns(ng-click="ctrl.select($index, $event)")
-                                span.item-detalle {{$index + 1}}&nbsp;-&nbsp;
-                                span(class="{{track.nombre ? 'item' : 'item-detalle' }}") {{track.nombre ? track.nombre : '[sin nombre]'}}&nbsp;-&nbsp;
-                                span.item-detalle {{track.bandaNombre ? track.bandaNombre : '[sin nombre]'}}
-                            div.small-1.columns.clickeable(ng-click="ctrl.menuListaReproduccion($index, $event)"). ...
-                    div.clearfix.limpiar-todo(ng-click="ctrl.limpiarLista()")
-                        span
-                            i.right.fi-trash
-                            span.right limpiar lista
+                        div.clearfix.selectable(ng-repeat="track in listaReproduccion",ng-class="{playing:track.playing, selected:track.selected}",ng-click="ctrl.select($index, $event)")
+                            span.item-detalle {{$index + 1}}&nbsp;-&nbsp;
+                            span(class="{{track.nombre ? 'item' : 'item-detalle' }}") {{track.nombre ? track.nombre : '[sin nombre]'}}&nbsp;-&nbsp;
+                            span.item-detalle {{track.banda ? track.banda : '[sin nombre]'}}
+                            span.boton-info.right(ng-click="ctrl.menuListaReproduccion($index, $event)")
+                                i.icon-menu.icon-14
+                            span.boton-play.right(ng-click="ctrl.reproducir($index)")
+                                i.fi-play.icon-14
         div.barra-inferior
-            range.buscador-range(current="currentTimeRange", max="maxTimeRange", handler="buscador")
+            range.buscador-range(current="currentTimeRange", max="maxTimeRange", handler="buscador", formatear-tooltip="formatBuscador")
             div.head
                 h1.titulo P&oacute;ngale Play
                 div.track-info
@@ -97,15 +95,15 @@ html(ng-app="PongalePlay")
                     span.album(ng-show="info.album") [&nbsp;{{info.album}}&nbsp;] &nbsp;
 
                     span.current-time(ng-hide="currentTime") [0:0:0
-                    span.current-time(ng-show="currentTime") [{{currentTime.horas | number:0}}:{{currentTime.minutos | number:0}}:{{currentTime.segundos | number:0}}&nbsp;/
+                    span.current-time(ng-show="currentTime") [{{currentTime.horas}}:{{currentTime.minutos}}:{{currentTime.segundos}}&nbsp;/
                     span.duration(ng-hide="duration") /0:0:0]
-                    span.duration(ng-show="duration") &nbsp;{{duration.horas | number:0}}:{{duration.minutos | number:0}}:{{duration.segundos | number:0}}]
+                    span.duration(ng-show="duration") &nbsp;{{duration.horas}}:{{duration.minutos}}:{{duration.segundos}}]
             div.controles
                 div.botones
                     span.boton.previous(ng-click="ctrl.previousTrack()", title="tema anterior")
                         i.fi-previous.icon-20
                     span.boton.play-pause(ng-click="ctrl.togglePlayPause()", title="reproducir/pausa")
-                        i.fi-play.icon-20(title="reproducir", ng-hide="playing")
+                        i.fi-play.icon-20(title="reproducir", ng-show="paused || stoped")
                         i.fi-pause.icon-20(title="pausa", ng-show="playing")
                     span.boton.next(ng-click="ctrl.nextTrack()", title="tema siguiente")
                         i.fi-next.icon-20
@@ -113,7 +111,7 @@ html(ng-app="PongalePlay")
                         i.fi-info.icon-20(ng-click="ctrl.showInfoPopUp()", title="info")
                 div.control-volumen
                     div.volume-label volume {{labelVolume}}
-                    range.volume-range(current="volume", max="volMax", handler="setVolume")
+                    range.volume-range(max="volMax", current="volume", handler="setVolume")
                     div.mute-label(title="silencio",ng-click="ctrl.mute()")
                         i.fi-volume-strike.icon-16(ng-show="!muted")
                         i.fi-volume.icon-16(ng-show="muted")
@@ -128,10 +126,6 @@ html(ng-app="PongalePlay")
                 div(ng-click="ctrl.reproducirTema()") reproducir
                 div(ng-click="ctrl.mostrarInfoTema()") ver informaci&oacute;n
                 div(ng-click="ctrl.agregarTemaALista()") agregar a lista
-        div#menu-discos.menu-contextual(ng-show="menu.discos", style="top:{{menu.top - 5}}px; left: {{menu.left - 100}}px", ng-mouseleave="hideMenu()")
-            div
-                div(ng-click="ctrl.reproducirDisco()") reproducir
-                div(ng-click="ctrl.agregarDiscoALista()") agregar a lista
         div.reveal-modal.medium.info-popup-show(ng-show="infoPopUp.show")
              div(ng-include="'help'")
              a.close-reveal-modal(ng-click="ctrl.hideInfoPopUp()") &#215;

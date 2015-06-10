@@ -20,7 +20,6 @@
 .playing, .playing .item-detalle, .selected.playing{
     color: #000;
     background-color: #bbb;
-    font-size: 14px;
     font-weight: bold;
 }
 .selected{
@@ -37,25 +36,6 @@
 }
 .icon-20{
     font-size: 20px;
-}
-.lista-vacia{
-    color: #d8d8d8;
-    font-size: 26px;
-    font-weight: bold;
-    text-align: center;
-}
-.limpiar-todo{
-    cursor: pointer;
-    margin-right: 10px;
-    
-    span, i{
-        color: #bbb;
-        font-weight: bold;
-    }
-    i{
-        font-size: 20px;
-        margin-left: 4px;
-    }
 }
 
 i[class*="icon-"]{
@@ -134,15 +114,32 @@ i[class*="icon-"]{
     font-size: 14px;
     height: 25px;
     
-    span:first-child{
+    span.titulo{
         margin-left: 5px;
     }
 
+    span.limpiar{
+        margin-right: 5px;
+    }
+    
     i{
         font-size: 16px;
         cursor: pointer;
     }
 }
+#column-bandas, #column-discos, #column-lista {
+    box-shadow: 3px 3px 5px 0px #ccc;
+}
+
+span.boton-play, span.boton-info{
+    display: none;
+    margin-right: 5px;
+}
+.selectable:hover span.boton-play, .selectable:hover span.boton-info{
+    display: inline-block;
+    z-index: 1001;
+}
+
 #column-bandas{
     input#buscador{
         font-family: @defaultFont;
@@ -158,8 +155,12 @@ i[class*="icon-"]{
         padding-right: 0px;
     }
 }
-.lista-vacia{
+.lista-vacia, .cargando{
+    color: #d8d8d8;
+    font-size: 26px;
+    font-weight: bold;
     padding-top: 10px;
+    text-align: center;
 }
 .panel-body{
     border-color: #d8d8d8;
@@ -208,25 +209,60 @@ body{
 }
 
 .buscador-range{
+    position: relative;
+    
     ul{
         list-style: none;
         margin: 0px;
         padding: 0px;
 
         li{
-            background-color: #000;
-            border-top: 1px solid #f2f2f2;
-            border-bottom: 1px solid #f2f2f2;
             cursor: pointer;
             display: inline-block;
             height: 5px;
         }
-
-        li.played{
-            background-color: #f2f2f2;
-            border-top: 1px #d8d8d8 solid;
-            border-bottom: 1px #d8d8d8 solid;
+        li.played ~ li{
+            background-color: #3ab8a5;
+            border-top: 1px solid #777;
+            border-bottom: 1px solid #777;
         }
+        li.buffered ~ li{
+            background-color: #000;
+            border-top: 1px solid #777;
+            border-bottom: 1px solid #777;
+        }
+        li, li.played{
+            background-color: #fff;
+            border-top: 1px #fff solid;
+            border-bottom: 1px #fff solid;
+        }
+    }
+    .tooltip{
+        background-color: transparent;
+        color: #3ab8a5;
+        display: block;
+        font-size: 4em;
+        text-align: center;
+        text-shadow: 0px 0px 2px #ccc;
+        
+        margin: auto;
+        left: 0px;
+        right: 0px;
+        bottom: 20px;
+    }
+    .tooltip.ng-hide-add{
+        -webkit-transition-property: opacity;
+        -moz-transition-property: opacity;
+        -o-transition-property: opacity;
+        transition-property: opacity;
+        -webkit-transition-duration: 0.75s;
+        -moz-transition-duration: 0.75s;
+        -o-transition-duration: 0.75s;
+        transition-duration: 0.75s;
+        opacity: 1;
+    }
+    .tooltip.ng-hide{
+        opacity: 0;
     }
 }
 .volume-range{
@@ -236,19 +272,23 @@ body{
         padding: 0px;
 
         li{
-            background-color: #777;
-            border-top: 1px solid #777;
-            border-bottom: 1px solid #777;
             cursor: pointer;
             display: inline-block;
             height: 5px;
         }
-
-        li.played{
+        li.played ~ li{
+            background-color: #777;
+            border-top: 1px solid #777;
+            border-bottom: 1px solid #777;
+        }
+        li, li.played{
             background-color: #ddd;
             border-top: 1px #ddd solid;
             border-bottom: 1px #ddd solid;
         }
+    }
+    .tooltip{
+        display: none;
     }
 }
 .barra-inferior{
@@ -394,9 +434,6 @@ body{
     #column-lista{
         width: 99%;
     }
-    i.fi-arrow-up, i.fi-arrow-down{
-        display: none;
-    }
 
     /* bordes */
     div#column-bandas{
@@ -459,7 +496,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 477px;
+            height: 501px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -467,9 +504,6 @@ body{
     }
     div#column-discos>div:nth-child(2){
         margin-bottom: 0px;
-    }
-    i.fi-arrow-up, i.fi-arrow-down{
-        display: none;
     }
     .track-info{
         .album{
@@ -534,7 +568,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 537px;
+            height: 561px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -547,7 +581,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 577px;
+            height: 601px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -560,7 +594,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 627px;
+            height: 651px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -573,7 +607,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 677px;
+            height: 701px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -586,7 +620,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 727px;
+            height: 751px;
         }
     }
     div#column-discos .panel-body .lista{
@@ -599,7 +633,7 @@ body{
     }
     div#column-lista{
         .panel-body .lista{
-            height: 777px;
+            height: 801px;
         }
     }
     div#column-discos .panel-body .lista{

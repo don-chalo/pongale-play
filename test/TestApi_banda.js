@@ -122,7 +122,7 @@ describe('Servicio rest /banda,', function () {
             request
                 .get({
                         json: true,
-                        url: url + '/123456789012345678901234',
+                        url: url + '/1234567890123456',
                         timeout: 60000
                     },
                     function (_err, _response2, _body) {

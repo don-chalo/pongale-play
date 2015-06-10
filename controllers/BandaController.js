@@ -1,6 +1,5 @@
-var RoutesUtils = require('../services/controllers-utils');
-
-var BandaModel = require('../models/Banda');
+var RoutesUtils = require( '../services/controllers-utils' );
+var BandaModel = require( '../models/Banda' );
 
 module.exports = {
     "find": function(req, res) {
@@ -39,7 +38,7 @@ module.exports = {
     },
     "findOne": function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.bandaid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.bandaid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [' + req.params.bandaid + '].' });
         }
 

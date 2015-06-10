@@ -3,9 +3,7 @@ var mm = require('musicmetadata');
 var mime = require('mime');
 
 var config = require('../config/scan.json');
-
 var RoutesUtils = require('../services/controllers-utils');
-
 var TemaModel = require('../models/Tema');
 
 module.exports = {
@@ -44,7 +42,7 @@ module.exports = {
             query.genero = req.query.genero;
         }
         if(req.query.bandaid){
-            if(/^[0-9a-zA-Z]{16}$/.test(req.query.bandaid)){
+            if(/^[0-9a-zA-Z]{1,}$/.test(req.query.bandaid)){
                 query.bandaid = req.query.bandaid;
             }else{
                 return res.status(400).json({ message: 'error, valor incorrecto [bandaid = "' + req.query.bandaid + '"].' });
@@ -61,7 +59,7 @@ module.exports = {
             }
         }
         if(req.query.discoid){
-            if(/^[0-9a-zA-Z]{16}$/.test(req.query.discoid)){
+            if(/^[0-9a-zA-Z]{1,}$/.test(req.query.discoid)){
                 query.discoid = req.query.discoid;
             }else{
                 return res.status(400).json({ message: 'error, valor incorrecto para [discoid = "' + req.query.discoid + '"].' });
@@ -88,7 +86,7 @@ module.exports = {
     },
     findOne: function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.temaid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.temaid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [id = "' + req.params.temaid + '"].' });
         }
 
@@ -107,7 +105,7 @@ module.exports = {
     },
     getMetadata: function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.temaid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.temaid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [id = "' + req.params.temaid + '"].' });
         }
 
@@ -160,7 +158,7 @@ module.exports = {
     },
     getStream: function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.temaid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.temaid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [id = "' + req.params.temaid + '"].' });
         }
 
@@ -177,8 +175,9 @@ module.exports = {
             }
 
             try{
-                res.sendfile(config.src + result.path);
+                res.set('Accept-Ranges', 'none').sendfile(config.src + result.path);
             }catch(e){
+                console.error( e );
                 res.status(500).end();
                 return;
             }
@@ -187,7 +186,7 @@ module.exports = {
     },
     getCover: function(req, res){
 
-        if(!/^[0-9a-zA-Z]{16}$/.test(req.params.temaid)){
+        if(!/^[0-9a-zA-Z]{1,}$/.test(req.params.temaid)){
             return res.status(400).json({ message: 'error, valor incorrecto para [id = "' + req.params.temaid + '"].' });
         }
 
