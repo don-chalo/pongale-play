@@ -1,88 +1,76 @@
 'use strict';
 
-angular.module('Componentes', ['Entidades', 'Librerias', 'BibliotecaSrv'])
-.directive('metadataTema', function(){
+angular.module('Directivas', ['Servicios'])
+.directive('metadataTema', ["MetadataSrv", function(metadataSrv){
+    
+    function MetadataCtrl(){ }
+    
+    Object.defineProperty(MetadataCtrl.prototype, "metadata", {
+        enumerable: true,
+        configurable: false,
+        get: function(){ return metadataSrv.get() }
+    });
+    
     return {
-        restrict: 'E',
-        transclude: true,
-        controllerAs: 'metadataCtrl',
-        scope: { mostrarMetadata: '=show', metadata: '=value' },
+        controller: MetadataCtrl,
+        controllerAs: "metadataCtrl",
         link: function($scope, element, attrs, ctrl){
-            ctrl.hideMetadata = function(){
-                $scope.mostrarMetadata = false;
-            };
+            $scope.hide = function(){ $scope.show = false; };
         },
-        controller: function($scope){
-        },
-        templateUrl: 'metadata',
-        replace: true
+        scope: { show: '=' },
+        replace: true,
+        restrict: 'E',
+        templateUrl: '/metadata',
+        transclude: false
     };
-}).directive('range', [function(){
+}]).directive('range', [function(){
+    
+    function RangeCtrl(){
+        this.mostrar = false;
+        this.valor = "";
+        this.values = [];
+        this.width = "100%";
+    };
+    RangeCtrl.prototype._format = function(){ return ""; };
+    RangeCtrl.prototype.ocultarTooltip = function( $event ){ this.mostrar = false; };
+    RangeCtrl.prototype.mostrarTooltip = function( $event, bloque ){
+        if(bloque){
+            this.valor = this._format( bloque );
+            this.mostrar = true;
+        }
+    };
+    RangeCtrl.prototype.select = function(){};
+    
     return {
-        restrict: 'E',
-        transclude: true,
-        controllerAs: 'ctrl',
-        scope: { max:"=max", current: '=current' },
+        controller: RangeCtrl,
+        controllerAs: "rangeCtrl",
         link: function($scope, element, attrs, ctrl){
-            $scope.select = function($index, $event){
-                if(typeof $scope.$parent[attrs.handler] === 'function'){
-                    $scope.$parent[attrs.handler]( $index, $event );
-                }
-            };
+            ctrl.select = $scope.$parent[attrs.handler];
             
             /* Tooltip habilitado solo si el atributo tiene un valor. */
             if(typeof attrs.formatearTooltip !== "undefined"){
-                var _format = typeof $scope.$parent[attrs.formatearTooltip] === "function" ? $scope.$parent[attrs.formatearTooltip] : function(_v){ return _v; };
-            
-                $scope.mostrarTooltip = function( $event, bloque ){
-                    if(bloque){
-                        var obj = _format( bloque )
-                        $scope.valor = (obj.horas === "0" ? '': obj.horas + ":") + obj.minutos + ":" + obj.segundos;
-                        $scope.mostrar = true;
-                    }
-                }
-                $scope.ocultarTooltip = function( $event ){
-                    $scope.mostrar = false;
-                }
+                ctrl._format = typeof $scope.$parent[attrs.formatearTooltip] === "function" ? $scope.$parent[attrs.formatearTooltip] : function(_v){ return _v; };
             }
-        },
-        controller: function($scope){
-            $scope.$watch("max",
+            
+            $scope.$watch("rangeAttrs.max",
                 function(newValue, oldValue){
                     if(typeof newValue === 'undefined'){
-                        $scope.values = [ { r: false } ];
-                        $scope.width = '100%';
+                        ctrl.values = [ { r: false } ];
+                        ctrl.width = '100%';
                     }else{
-                        $scope.values = [];
+                        ctrl.values = [];
                         for(var i = 0; i <= parseInt( newValue ); i++){
-                            $scope.values.push( { r: false, bloque: i } );
+                            ctrl.values.push( { r: false, bloque: i } );
                         }
-                        $scope.width = ( 100 / $scope.values.length ) + '%';
+                        ctrl.width = ( 100 / ctrl.values.length ) + '%';
                     }
                 }
             );
-            
-            $scope.$watch("current",
-                function(newValue, oldValue){
-                    if(typeof oldValue !== 'undefined' && typeof $scope.values[ oldValue ] !== 'undefined'){
-                        $scope.values[ oldValue ].r = false;
-                    }
-                    if(typeof newValue !== 'undefined' && typeof $scope.values[ newValue ] !== 'undefined'){
-                        $scope.values[ newValue ].r = true;
-                    }
-                });
         },
-        templateUrl: 'range',
-        replace: true
+        replace: true,
+        restrict: 'E',
+        scope: { rangeAttrs: "=" },
+        templateUrl: '/range',
+        transclude: false
     };
-}]).directive('ngRightClick', function($parse) {
-    return function(scope, element, attrs) {
-        var fn = $parse(attrs.ngRightClick);
-        element.bind('contextmenu', function(event) {
-            scope.$apply(function() {
-                event.preventDefault();
-                fn(scope, {$event:event});
-            });
-        });
-    };
-});
+}]);

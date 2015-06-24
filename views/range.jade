@@ -1,4 +1,4 @@
 div
     ul
-        li.has-tip.tip-left(ng-repeat="i in values",ng-class="{played:i.r}",ng-style="{width:width}",ng-click="select($index,$event)",ng-mouseover="mostrarTooltip($event,i.bloque)",ng-mouseout="ocultarTooltip($event)")
-    div.tooltip.round(ng-show="mostrar") {{valor}}
+        li.has-tip.tip-left(ng-repeat="i in rangeCtrl.values",ng-class="{played: $index === rangeAttrs.current}",ng-style="{width:rangeCtrl.width}",ng-click="rangeCtrl.select($index,$event)",ng-mouseover="rangeCtrl.mostrarTooltip($event,i.bloque)",ng-mouseout="rangeCtrl.ocultarTooltip()")
+    div.tooltip.round(ng-show="rangeCtrl.mostrar") {{rangeCtrl.valor}}

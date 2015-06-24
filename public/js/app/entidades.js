@@ -1,8 +1,7 @@
 'use strict';
 
-var entities = angular.module('Entidades', ['ngCookies']);
-
-entities.factory('audio', ['$document', function($document){
+angular.module("Entidades", [])
+.factory('audio', ["$document", function($document){
     var audio = $document[0].createElement('audio');
     var isPlaying = false;
     var isPaused = false;
@@ -22,19 +21,20 @@ entities.factory('audio', ['$document', function($document){
         };
     }
     
-    function playing(){ isPlaying = true; isPaused = false; state = 'playing'; };
-    function paused(){ isPlaying = false; isPaused = true; state = 'paused'; };
-    function stoped(){ isPlaying = false; isPaused = false; state = 'stoped'; };
+    function playing(){ isPlaying = true; isPaused = false; state = 'tocando'; };
+    function paused(){ isPlaying = false; isPaused = true; state = 'pause'; };
+    function stoped(){ isPlaying = false; isPaused = false; state = 'detenido'; };
     
     return {
-        playing: function(){ return isPlaying; },
-        paused: function(){ return isPaused; },
-        stoped: function(){ return !isPaused && !isPlaying; },
+        isPlaying: function(){ return isPlaying; },
+        isPaused: function(){ return isPaused; },
+        isStoped: function(){ return !isPaused && !isPlaying; },
         getState: function(){ return state; },
         play: function(filename, type) {
             audio.src = filename;
             audio.type = type;
-            if(!audio.muted){ audio.play(); playing(); }
+            audio.play();
+            playing();
             return isPlaying;
         },
         pause: function(){
@@ -77,8 +77,10 @@ entities.factory('audio', ['$document', function($document){
             }
         },
         ended: function(fc){
-            audio.addEventListener('ended', fc);
-            stoped();
+            audio.addEventListener('ended', function(){
+                stoped();
+                fc();
+            });
         },
         timeupdate: function(fc){
             audio.addEventListener('timeupdate', function(ev){
@@ -86,9 +88,7 @@ entities.factory('audio', ['$document', function($document){
             });
         },
         error: function(fc){
-            audio.addEventListener('error', function(err){
-                fc(err);
-            });
+            audio.addEventListener('error', fc);
         }
     };
 }])

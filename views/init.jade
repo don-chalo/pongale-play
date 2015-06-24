@@ -12,59 +12,57 @@ html(ng-app="PongalePlay")
         link(href='/stylesheets/audioapp-white-theme.css',rel='stylesheet',type="text/css")
         link(href='/stylesheets/extra-fonts.css',rel='stylesheet',type="text/css")
 
-        script(type="text/javascript", src="/js/libs/jquery-1.9.1.min.js")
         script(type="text/javascript", src="/js/libs/underscore-min.js")
-        //script(type="text/javascript", src="/js/libs/foundation-5.4.0/foundation.min.js")
         script(type="text/javascript", src="/js/libs/angular/angular.min.js")
         script(type="text/javascript", src="/js/libs/angular/angular-animate.min.js")
-        script(type="text/javascript", src="/js/libs/angular/angular-cookies.min.js")
         script(type="text/javascript", src="/js/libs/angular/angular-resource.min.js")
         script(type="text/javascript", src="/js/app/main.js")
         script(type="text/javascript", src="/js/app/entidades.js")
         script(type="text/javascript", src="/js/app/servicios.js")
+        script(type="text/javascript", src="/js/app/recursos.js")
         script(type="text/javascript", src="/js/app/directivas.js")
         script(type="text/javascript", src="/js/app/libs.js")
 
     body(ng-controller="AudioController as ctrl", ng-keydown="ctrl.onKeyDown($event)")
-        div.alert-box(ng-show="msg.visible", class="{{msg.type}}")
-            span {{msg.txt}}
+        div.alert-box(ng-show="ctrl.msg.visible", class="{{ctrl.msg.type}}")
+            span {{ctrl.msg.txt}}
             i.fi-x(ng-click="ctrl.hideMsg()")
         div.contenedor
             div#column-bandas
                 div.panel-title
-                    span bandas [{{bandas.length}}]
+                    span bandas [{{ctrl.bandas.length}}]
                 div.panel-body
                     div.buscardor-panel
                         i.fi-page-search
                         input#buscador.form-control(type="text",ng-model="query",ng-trim="true",placeholder="buscar...")
                     div.lista.lista-bandas
-                        div.selectable(ng-repeat="banda in bandas | filter: query",ng-click="ctrl.seleccionarBanda(banda._id)", ng-class="{selected:banda.selected}")
+                        div.selectable(ng-repeat="banda in ctrl.bandas | filter: query",ng-click="ctrl.seleccionarBanda(banda._id)", ng-class="{selected:banda.selected}")
                             span.item {{banda.nombre}}
             div#column-discos
                 div.panel-title
-                    span {{banda.nombre}}
-                    span(ng-show="discos.length") &nbsp;[discos {{' ' + (discos.length ? discos.length : 0)}}]
+                    span {{ctrl.banda.nombre}}
+                    span(ng-show="ctrl.discos.length") &nbsp;[discos {{' ' + (ctrl.discos.length ? ctrl.discos.length : 0)}}]
                 div.panel-body
                     div.lista.lista-discos
-                        div.lista-vacia(ng-show="discos.length === 0 && !discos.cargando") Selecciona una banda
-                        div.cargando(ng-show="discos.cargando") cargando...
-                        div.clearfix.selectable(ng-show="!discos.cargando",ng-repeat="album in discos", ng-class="{selected:album.selected}", ng-click="ctrl.seleccionarAlbum($index)")
+                        div.lista-vacia(ng-show="ctrl.discos.length === 0 && !ctrl.discos.cargando") Selecciona una banda
+                        div.cargando(ng-show="ctrl.discos.cargando") cargando...
+                        div.clearfix.selectable(ng-show="!ctrl.discos.cargando",ng-repeat="album in ctrl.discos", ng-class="{selected:album.selected}", ng-click="ctrl.seleccionarAlbum($index)")
                             span.item-detalle(ng-show="album.ano") {{album.ano}}&nbsp;-&nbsp;
-                            span(class="{{album.nombre ? 'item' : 'item-detalle'}}") {{album.nombre ? album.nombre : '[sin nombre]'}}
-                            span.boton-info.right(ng-click="ctrl.agregarDiscoALista($index)")
+                            span(ng-class="{item: album.nombre, 'item-detalle': !album.nombre}") {{album.nombre ? album.nombre : '[sin nombre]'}}
+                            span.boton-info.right(ng-click="ctrl.agregarDisco($index)")
                                 i.fi-plus.icon-14
                             span.boton-play.right(ng-click="ctrl.reproducirDisco($index)")
                                 i.fi-play.icon-14
                 div.panel-title
-                    span {{disco.nombre}}
-                    span(ng-show="temas.length") &nbsp;[temas{{' ' + (temas.length ? temas.length : 0)}}]
+                    span {{ctrl.disco.nombre}}
+                    span(ng-show="ctrl.temas.length") &nbsp;[temas{{' ' + (ctrl.temas.length ? ctrl.temas.length : 0)}}]
                 div.panel-body
                     div.lista.lista-temas
-                        div.lista-vacia(ng-show="temas.length === 0 && !temas.cargando") Selecciona un disco
-                        div.cargando(ng-show="temas.cargando") cargando...
-                        div.clearfix.selectable(ng-show="!temas.cargando",ng-repeat="tema in temas", ng-class="{selected:tema.selected}", ng-click="ctrl.seleccionarTema($index)")
+                        div.lista-vacia(ng-show="ctrl.temas.length === 0 && !ctrl.temas.cargando") Selecciona un disco
+                        div.cargando(ng-show="ctrl.temas.cargando") cargando...
+                        div.clearfix.selectable(ng-show="!ctrl.temas.cargando",ng-repeat="tema in ctrl.temas", ng-class="{selected:tema.selected}", ng-click="ctrl.seleccionarTema($index)")
                             span.item-detalle(ng-show="tema.numero") {{tema.numero}}&nbsp;-&nbsp;
-                            span(class="{{tema.nombre ? 'item' : 'item-detalle'}}") {{tema.nombre ? tema.nombre : '[sin nombre]'}} &nbsp;
+                            span(ng-class="{item: tema.nombre, 'item-detalle': !tema.nombre}") {{tema.nombre ? tema.nombre : '[sin nombre]'}} &nbsp;
                             span.boton-info.right(ng-click="ctrl.menuListaTemas($index, $event)")
                                 i.icon-menu.icon-14
                             span.boton-play.right(ng-click="ctrl.reproducirTema($index)")
@@ -76,56 +74,54 @@ html(ng-app="PongalePlay")
                         i.fi-trash
                 div.panel-body
                     div.lista.lista-reproduccion
-                        div.lista-vacia(ng-show="listaReproduccion.length==0") No existen temas en la lista de reproducci&oacute;n
-                        div.clearfix.selectable(ng-repeat="track in listaReproduccion",ng-class="{playing:track.playing, selected:track.selected}",ng-click="ctrl.select($index, $event)")
+                        div.lista-vacia(ng-show="ctrl.listaReproduccion.length==0") No existen temas en la lista de reproducci&oacute;n
+                        div.clearfix.selectable(ng-repeat="track in ctrl.listaReproduccion",ng-class="{playing:track.playing, selected:track.selected}",ng-click="ctrl.select($index, $event)")
                             span.item-detalle {{$index + 1}}&nbsp;-&nbsp;
-                            span(class="{{track.nombre ? 'item' : 'item-detalle' }}") {{track.nombre ? track.nombre : '[sin nombre]'}}&nbsp;-&nbsp;
+                            span(ng-class="{item: track.nombre, 'item-detalle': !track.nombre}") {{track.nombre ? track.nombre : '[sin nombre]'}}&nbsp;-&nbsp;
                             span.item-detalle {{track.banda ? track.banda : '[sin nombre]'}}
                             span.boton-info.right(ng-click="ctrl.menuListaReproduccion($index, $event)")
                                 i.icon-menu.icon-14
                             span.boton-play.right(ng-click="ctrl.reproducir($index)")
                                 i.fi-play.icon-14
         div.barra-inferior
-            range.buscador-range(current="currentTimeRange", max="maxTimeRange", handler="buscador", formatear-tooltip="formatBuscador")
+            range.buscador-range(range-attrs="ctrl.timeRange", handler="buscador", formatear-tooltip="formatBuscador")
             div.head
                 h1.titulo P&oacute;ngale Play
                 div.track-info
-                    span.title(ng-show="info.title") [&nbsp;{{info.title}}&nbsp;] &nbsp;
-                    span.artist(ng-show="info.artist",ng-repeat="artist in info.artist") [&nbsp;{{artist}}&nbsp;] &nbsp;
-                    span.album(ng-show="info.album") [&nbsp;{{info.album}}&nbsp;] &nbsp;
+                    span.title(ng-show="ctrl.info.title") [&nbsp;{{ctrl.info.title}}&nbsp;] &nbsp;
+                    span.artist(ng-show="ctrl.info.artist",ng-repeat="artist in ctrl.info.artist") [&nbsp;{{artist}}&nbsp;] &nbsp;
+                    span.album(ng-show="ctrl.info.album") [&nbsp;{{ctrl.info.album}}&nbsp;] &nbsp;
 
-                    span.current-time(ng-hide="currentTime") [0:0:0
-                    span.current-time(ng-show="currentTime") [{{currentTime.horas}}:{{currentTime.minutos}}:{{currentTime.segundos}}&nbsp;/
-                    span.duration(ng-hide="duration") /0:0:0]
-                    span.duration(ng-show="duration") &nbsp;{{duration.horas}}:{{duration.minutos}}:{{duration.segundos}}]
+                    span.current-time(ng-hide="ctrl.currentTime") [0:0:0
+                    span.current-time(ng-show="ctrl.currentTime") [{{ctrl.currentTime.horas}}:{{ctrl.currentTime.minutos}}:{{ctrl.currentTime.segundos}}&nbsp;/
+                    span.duration(ng-hide="ctrl.duration") /0:0:0]
+                    span.duration(ng-show="ctrl.duration") &nbsp;{{ctrl.duration.horas}}:{{ctrl.duration.minutos}}:{{ctrl.duration.segundos}}]
             div.controles
                 div.botones
-                    span.boton.previous(ng-click="ctrl.previousTrack()", title="tema anterior")
+                    button.boton(ng-click="ctrl.previousTrack()", title="tema anterior")
                         i.fi-previous.icon-20
-                    span.boton.play-pause(ng-click="ctrl.togglePlayPause()", title="reproducir/pausa")
-                        i.fi-play.icon-20(title="reproducir", ng-show="paused || stoped")
-                        i.fi-pause.icon-20(title="pausa", ng-show="playing")
-                    span.boton.next(ng-click="ctrl.nextTrack()", title="tema siguiente")
+                    button.boton(ng-click="ctrl.togglePlayPause()", title="reproducir/pausa")
+                        i.icon-20(title="reproducir/pausa", ng-class="{'fi-pause':ctrl.isPlaying, 'fi-play':(ctrl.isPaused || ctrl.isStoped)}")
+                    button.boton(ng-click="ctrl.nextTrack()", title="tema siguiente")
                         i.fi-next.icon-20
-                    span.boton.info-label
-                        i.fi-info.icon-20(ng-click="ctrl.showInfoPopUp()", title="info")
+                    button.boton(ng-click="ctrl.showInfoPopUp()", title="info")
+                        i.fi-info.icon-20
                 div.control-volumen
-                    div.volume-label volume {{labelVolume}}
-                    range.volume-range(max="volMax", current="volume", handler="setVolume")
-                    div.mute-label(title="silencio",ng-click="ctrl.mute()")
-                        i.fi-volume-strike.icon-16(ng-show="!muted")
-                        i.fi-volume.icon-16(ng-show="muted")
-        metadata-tema.metadata-show(show="ctrl.mostrarMetadata", value="ctrl.metadata")
-        div#menu-lista.menu-contextual(ng-show="menu.lista", style="top:{{menu.top - 5}}px; left: {{menu.left - 100}}px", ng-mouseleave="hideMenu()")
+                    div.volume-label volume {{ctrl.labelVolume}}
+                    range.volume-range(range-attrs="ctrl.volumeRange",handler="setVolume")
+                    button.mute-botton(title="silencio",ng-click="ctrl.mute()")
+                        i.icon-16(ng-class="{'fi-volume-strike': !ctrl.muted, 'fi-volume': ctrl.muted}")
+        metadata-tema.metadata-show(show="ctrl.mostrarMetadata")
+        div#menu-lista.menu-contextual(ng-show="ctrl.menu.lista", ng-style="{top: (ctrl.menu.top - 5) + 'px', left: (ctrl.menu.left - 100) + 'px'}", ng-mouseleave="ctrl.hideMenu()")
             div
                 div(ng-click="ctrl.reproducir()") reproducir
                 div(ng-click="ctrl.mostrarInfoLista()") ver informaci&oacute;n
                 div(ng-click="ctrl.eliminarTema()") eliminar
-        div#menu-temas.menu-contextual(ng-show="menu.temas", style="top:{{menu.top - 5}}px; left: {{menu.left - 100}}px", ng-mouseleave="hideMenu()")
+        div#menu-temas.menu-contextual(ng-show="ctrl.menu.temas", ng-style="{top: (ctrl.menu.top - 5) + 'px', left: (ctrl.menu.left - 100) + 'px'}", ng-mouseleave="ctrl.hideMenu()")
             div
                 div(ng-click="ctrl.reproducirTema()") reproducir
                 div(ng-click="ctrl.mostrarInfoTema()") ver informaci&oacute;n
-                div(ng-click="ctrl.agregarTemaALista()") agregar a lista
-        div.reveal-modal.medium.info-popup-show(ng-show="infoPopUp.show")
+                div(ng-click="ctrl.agregarTema()") agregar a lista
+        div.reveal-modal.medium.info-popup-show(ng-show="ctrl.infoPopUp.show")
              div(ng-include="'help'")
              a.close-reveal-modal(ng-click="ctrl.hideInfoPopUp()") &#215;

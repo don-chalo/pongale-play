@@ -1,20 +1,20 @@
-div.panel.metadata(ng-show="mostrarMetadata")
+div.panel.metadata(ng-show="show")
     div.title
-        i.fi-x.icon-16(ng-click="metadataCtrl.hideMetadata()")
+        i.fi-x.icon-16(ng-click="hide()")
     div.cover
     div.campos
         div
             span.campo t&iacute;tulo
-            span.valor {{metadata.title}}
+            span.valor {{metadataCtrl.metadata.title}}
         div
             span.campo artista
-            span.valor {{metadata.artist[0]}}
+            span.valor {{metadataCtrl.metadata.artist[0]}}
         div
             span.campo &aacute;lbum
-            span.valor {{metadata.album}}
-        div(ng-show="metadata.year")
+            span.valor {{metadataCtrl.metadata.album}}
+        div(ng-show="metadataCtrl.metadata.year")
             span.campo año
-            span.valor {{metadata.year}}
-        div(ng-show="metadata.genre")
+            span.valor {{metadataCtrl.metadata.year}}
+        div(ng-show="metadataCtrl.metadata.genre")
             span.campo g&eacute;nero
-            span.valor(ng-repeat="g in metadata.genre") {{g}}
+            span.valor(ng-repeat="g in metadataCtrl.metadata.genre") {{g}}

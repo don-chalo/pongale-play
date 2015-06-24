@@ -1,30 +1,16 @@
-'use strict';
+/*
+ * Servicios orientados a compatir datos entre controllers y directivas.
+ */
 
-var BibliotecaSrv = angular.module('BibliotecaSrv', ['ngResource']);
+/* Servicio para metadata de tema seleccionado. */
+function MetadataSrv(){
+    var value;
+    
+    this.get = function(){ return value; };
+    this.set = function(val){ value = val; };
+}
 
-BibliotecaSrv.factory('BandaSrv', ['$resource',
-    function($resource){
-		return $resource('/banda/:bandaid', { bandaid: '@bandaid' }, {
-			query: { method: 'GET', params:{ }, isArray: true },
-			get: { method: 'GET', params:{ }, isArray: false }
-		});
-    }
-]);
 
-BibliotecaSrv.factory('DiscoSrv', ['$resource',
-    function($resource){
-		return $resource('/disco/:discoid', { bandaid: '@bandaid', discoid: '@discoid' }, {
-			query: { method: 'GET', params:{ }, isArray: true },
-			get: { method: 'GET', params:{ }, isArray: false }
-		});
-    }
-]);
 
-BibliotecaSrv.factory('TemaSrv', ['$resource',
-    function($resource){
-		return $resource('/tema/:temaid/:opcion', { discoid: '@discoid', temaid: '@temaid', opcion: '@opcion' }, {
-			query: { method: 'GET', params:{ }, isArray: true },
-			get: { method: 'GET', params:{ }, isArray: false }
-		});
-    }
-]);
+
+angular.module("Servicios", []).factory("MetadataSrv", function(){ return new MetadataSrv(); });
